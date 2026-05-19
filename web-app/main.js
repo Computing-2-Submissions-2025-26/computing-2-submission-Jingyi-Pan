@@ -3,8 +3,11 @@ const boardSize = 15;
 const boardElement = document.getElementById("board");
 const statusElement = document.getElementById("status");
 const restartButton = document.getElementById("restart-button");
-const animationScreen = document.getElementById("animation-screen");
-const animationContent = document.getElementById("animation-content");
+
+const videoPopupScreen = document.getElementById("video-popup-screen");
+const closeVideoButton = document.getElementById("close-video-button");
+const winVideo = document.getElementById("win-video");
+
 const penguinPlayer = document.getElementById("penguin-player");
 const seagullPlayer = document.getElementById("seagull-player");
 
@@ -68,10 +71,15 @@ function handleCellClick(event) {
     if (winningCells.length >= 5) {
         gameOver = true;
         showWinningCells(winningCells);
-        statusElement.textContent = getPlayerName(currentPlayer) + " wins!";
+
+        if (currentPlayer === "penguin") {
+            statusElement.textContent = "Penguin wins!";
+        } else {
+            statusElement.textContent = "Seagull wins!";
+        }
 
         setTimeout(function () {
-            playWinAnimation(currentPlayer);
+            playWinVideo(currentPlayer);
         }, 600);
 
         return;
@@ -82,17 +90,17 @@ function handleCellClick(event) {
 
 function placePiece(cell, player) {
     const piece = document.createElement("img");
-
     piece.classList.add("piece");
 
     if (player === "penguin") {
         piece.src = "penguin.jpg";
+        piece.alt = "Penguin";
     } else {
         piece.src = "seagull.jpg";
+        piece.alt = "Seagull";
     }
 
     piece.draggable = false;
-
     cell.appendChild(piece);
 }
 
@@ -104,15 +112,8 @@ function switchPlayer() {
         currentPlayer = "penguin";
         statusElement.textContent = "Penguin's turn";
     }
+
     updateActivePlayerImage();
-}
-
-function getPlayerEmoji(player) {
-    if (player === "penguin") {
-        return "🐧";
-    }
-
-    return "🕊️";
 }
 
 function getPlayerName(player) {
@@ -188,30 +189,29 @@ function showWinningCells(winningCells) {
     }
 }
 
-function playWinAnimation(winner) {
-    animationContent.innerHTML = "";
-    animationScreen.classList.remove("hidden");
+function playWinVideo(winner) {
+    videoPopupScreen.classList.remove("hidden");
 
     if (winner === "penguin") {
-        animationContent.innerHTML = `
-            <div class="poop-penguin">🐧</div>
-            <div class="poop">💩</div>
-            <div class="flying-seagull">🕊️</div>
-        `;
+        winVideo.src = "penguin-win.mp4";
     } else {
-        animationContent.innerHTML = `
-            <div class="carry-seagull">🕊️</div>
-            <div class="carried-penguin">🐧</div>
-        `;
+        winVideo.src = "seagull-win.mp4";
     }
 
-    setTimeout(function () {
-        restartGame();
-    }, 5000);
+    winVideo.currentTime = 0;
+    winVideo.play();
+}
+
+function closeWinVideo() {
+    winVideo.pause();
+    winVideo.src = "";
+
+    videoPopupScreen.classList.add("hidden");
+
+    restartGame();
 }
 
 function restartGame() {
-
     if (startingPlayer === "penguin") {
         startingPlayer = "seagull";
     } else {
@@ -219,7 +219,6 @@ function restartGame() {
     }
 
     currentPlayer = startingPlayer;
-
     gameOver = false;
 
     if (currentPlayer === "penguin") {
@@ -228,16 +227,16 @@ function restartGame() {
         statusElement.textContent = "Seagull's turn";
     }
 
-    animationScreen.classList.add("hidden");
-
-    animationContent.innerHTML = "";
+    videoPopupScreen.classList.add("hidden");
+    winVideo.pause();
+    winVideo.src = "";
 
     createBoard();
-
     updateActivePlayerImage();
 }
 
 restartButton.addEventListener("click", restartGame);
+closeVideoButton.addEventListener("click", closeWinVideo);
 
 createBoard();
 updateActivePlayerImage();
