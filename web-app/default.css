@@ -1,14 +1,11 @@
 :root {
     --board-size: min(82vw, 82vh);
     --cell-size: calc(var(--board-size) / 15);
-    --line-color: #3a2514;
-    --board-color: #d9a35f;
     --text-color: #222;
-    --button-color: #222;
+    --button-color: #2f6f8f;
     --button-text: white;
     --font-size-title: 32px;
     --font-size-status: 20px;
-    --font-size-piece: calc(var(--cell-size) * 0.65);
 }
 
 * {
@@ -19,8 +16,15 @@ body {
     margin: 0;
     min-height: 100vh;
     font-family: Arial, sans-serif;
-    background: #f4efe7;
     color: var(--text-color);
+    background:
+        linear-gradient(
+            to bottom,
+            #8fd3ff 0%,
+            #bfe8ff 35%,
+            #f6e2b3 35%,
+            #f3d79b 100%
+        );
 }
 
 main {
@@ -46,12 +50,12 @@ h1 {
 #board {
     border-collapse: collapse;
     table-layout: fixed;
-    border: 4px solid #5a3417;
-    border-radius: 10px;
+    border: 6px solid #b97a3f;
+    border-radius: 14px;
     overflow: hidden;
     box-shadow:
-        0 10px 25px rgba(0,0,0,0.18),
-        inset 0 0 20px rgba(255,255,255,0.12);
+        0 14px 35px rgba(150, 100, 40, 0.28),
+        inset 0 0 20px rgba(255, 255, 255, 0.18);
 }
 
 td {
@@ -67,29 +71,29 @@ td {
     overflow: hidden;
 }
 
-/* 跳色棋盘 */
+/* 海滩风跳色棋盘 */
 tr:nth-child(odd) td:nth-child(odd) {
-    background: #d9a35f;
+    background: #f6d99a;
 }
 
 tr:nth-child(odd) td:nth-child(even) {
-    background: #c98d49;
+    background: #edc97e;
 }
 
 tr:nth-child(even) td:nth-child(odd) {
-    background: #c98d49;
+    background: #edc97e;
 }
 
 tr:nth-child(even) td:nth-child(even) {
-    background: #d9a35f;
+    background: #f6d99a;
 }
 
-/* 网格线 */
+/* 柔和网格线 */
 td::after {
     content: "";
     position: absolute;
     inset: 0;
-    border: 1px solid rgba(60, 35, 15, 0.35);
+    border: 1px solid rgba(140, 95, 40, 0.28);
     pointer-events: none;
 }
 
@@ -103,19 +107,13 @@ td:hover {
 .piece {
     width: 92%;
     height: 92%;
-
     object-fit: contain;
-
     display: block;
     margin: auto;
-
     animation: pop 0.18s ease-out;
-
     user-select: none;
     pointer-events: none;
-
-    filter:
-        drop-shadow(0 3px 4px rgba(0,0,0,0.25));
+    filter: drop-shadow(0 3px 4px rgba(0, 0, 0, 0.25));
 }
 
 @keyframes pop {
@@ -145,17 +143,22 @@ td:hover {
 #restart-button {
     padding: 8px 18px;
     border: none;
-    border-radius: 8px;
+    border-radius: 999px;
     background: var(--button-color);
     color: var(--button-text);
     font-size: 16px;
     cursor: pointer;
+    box-shadow: 0 5px 12px rgba(0, 0, 0, 0.18);
+}
+
+#restart-button:hover {
+    filter: brightness(1.1);
 }
 
 #animation-screen {
     position: fixed;
     inset: 0;
-    background: rgba(244, 239, 231, 0.95);
+    background: rgba(246, 226, 179, 0.96);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -259,5 +262,41 @@ td:hover {
 
     100% {
         transform: translate(90vw, -35vh) rotate(30deg);
+    }
+}
+
+#game-area {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 28px;
+}
+
+.side-player {
+    width: clamp(80px, 12vw, 180px);
+    height: clamp(80px, 12vw, 180px);
+    object-fit: contain;
+    opacity: 0.45;
+    transform: scale(0.9);
+    transition:
+        transform 0.25s,
+        opacity 0.25s,
+        filter 0.25s;
+}
+
+.active-player {
+    opacity: 1;
+    transform: scale(1.2);
+    filter: drop-shadow(0 8px 14px rgba(0, 0, 0, 0.28));
+    animation: playerJump 0.6s infinite alternate ease-in-out;
+}
+
+@keyframes playerJump {
+    from {
+        transform: scale(1.2) translateY(0);
+    }
+
+    to {
+        transform: scale(1.2) translateY(-18px);
     }
 }

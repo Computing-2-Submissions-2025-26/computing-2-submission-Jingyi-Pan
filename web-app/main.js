@@ -5,10 +5,22 @@ const statusElement = document.getElementById("status");
 const restartButton = document.getElementById("restart-button");
 const animationScreen = document.getElementById("animation-screen");
 const animationContent = document.getElementById("animation-content");
+const penguinPlayer = document.getElementById("penguin-player");
+const seagullPlayer = document.getElementById("seagull-player");
 
 let board = [];
 let currentPlayer = "penguin";
 let gameOver = false;
+
+function updateActivePlayerImage() {
+    if (currentPlayer === "penguin") {
+        penguinPlayer.classList.add("active-player");
+        seagullPlayer.classList.remove("active-player");
+    } else {
+        seagullPlayer.classList.add("active-player");
+        penguinPlayer.classList.remove("active-player");
+    }
+}
 
 function createBoard() {
     boardElement.innerHTML = "";
@@ -91,6 +103,7 @@ function switchPlayer() {
         currentPlayer = "penguin";
         statusElement.textContent = "Penguin's turn";
     }
+    updateActivePlayerImage();
 }
 
 function getPlayerEmoji(player) {
@@ -203,8 +216,10 @@ function restartGame() {
     animationScreen.classList.add("hidden");
     animationContent.innerHTML = "";
     createBoard();
+    updateActivePlayerImage();
 }
 
 restartButton.addEventListener("click", restartGame);
 
 createBoard();
+updateActivePlayerImage();
