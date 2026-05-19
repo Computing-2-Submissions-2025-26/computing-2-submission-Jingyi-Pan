@@ -9,7 +9,8 @@ const penguinPlayer = document.getElementById("penguin-player");
 const seagullPlayer = document.getElementById("seagull-player");
 
 let board = [];
-let currentPlayer = "penguin";
+let startingPlayer = "penguin";
+let currentPlayer = startingPlayer;
 let gameOver = false;
 
 function updateActivePlayerImage() {
@@ -210,12 +211,29 @@ function playWinAnimation(winner) {
 }
 
 function restartGame() {
-    currentPlayer = "penguin";
+
+    if (startingPlayer === "penguin") {
+        startingPlayer = "seagull";
+    } else {
+        startingPlayer = "penguin";
+    }
+
+    currentPlayer = startingPlayer;
+
     gameOver = false;
-    statusElement.textContent = "Penguin's turn";
+
+    if (currentPlayer === "penguin") {
+        statusElement.textContent = "Penguin's turn";
+    } else {
+        statusElement.textContent = "Seagull's turn";
+    }
+
     animationScreen.classList.add("hidden");
+
     animationContent.innerHTML = "";
+
     createBoard();
+
     updateActivePlayerImage();
 }
 
