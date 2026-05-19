@@ -1,5 +1,263 @@
-body
-{
-    color:red;
-    font - family:"Imperial Sans Display"
+:root {
+    --board-size: min(82vw, 82vh);
+    --cell-size: calc(var(--board-size) / 15);
+    --line-color: #3a2514;
+    --board-color: #d9a35f;
+    --text-color: #222;
+    --button-color: #222;
+    --button-text: white;
+    --font-size-title: 32px;
+    --font-size-status: 20px;
+    --font-size-piece: calc(var(--cell-size) * 0.65);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: Arial, sans-serif;
+    background: #f4efe7;
+    color: var(--text-color);
+}
+
+main {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+}
+
+h1 {
+    margin: 0;
+    font-size: var(--font-size-title);
+}
+
+#status {
+    margin: 0;
+    font-size: var(--font-size-status);
+    font-weight: bold;
+}
+
+#board {
+    border-collapse: collapse;
+    table-layout: fixed;
+    border: 4px solid #5a3417;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow:
+        0 10px 25px rgba(0,0,0,0.18),
+        inset 0 0 20px rgba(255,255,255,0.12);
+}
+
+td {
+    width: var(--cell-size);
+    height: var(--cell-size);
+    text-align: center;
+    vertical-align: middle;
+    cursor: pointer;
+    position: relative;
+    transition:
+        background 0.15s,
+        transform 0.1s;
+    overflow: hidden;
+}
+
+/* 跳色棋盘 */
+tr:nth-child(odd) td:nth-child(odd) {
+    background: #d9a35f;
+}
+
+tr:nth-child(odd) td:nth-child(even) {
+    background: #c98d49;
+}
+
+tr:nth-child(even) td:nth-child(odd) {
+    background: #c98d49;
+}
+
+tr:nth-child(even) td:nth-child(even) {
+    background: #d9a35f;
+}
+
+/* 网格线 */
+td::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border: 1px solid rgba(60, 35, 15, 0.35);
+    pointer-events: none;
+}
+
+/* 鼠标悬停 */
+td:hover {
+    filter: brightness(1.08);
+    transform: scale(1.03);
+    z-index: 2;
+}
+
+.piece {
+    width: 92%;
+    height: 92%;
+
+    object-fit: contain;
+
+    display: block;
+    margin: auto;
+
+    animation: pop 0.18s ease-out;
+
+    user-select: none;
+    pointer-events: none;
+
+    filter:
+        drop-shadow(0 3px 4px rgba(0,0,0,0.25));
+}
+
+@keyframes pop {
+    from {
+        transform: scale(0);
+    }
+
+    to {
+        transform: scale(1);
+    }
+}
+
+.winning-piece {
+    animation: winnerPulse 0.5s infinite alternate;
+}
+
+@keyframes winnerPulse {
+    from {
+        transform: scale(1);
+    }
+
+    to {
+        transform: scale(1.25);
+    }
+}
+
+#restart-button {
+    padding: 8px 18px;
+    border: none;
+    border-radius: 8px;
+    background: var(--button-color);
+    color: var(--button-text);
+    font-size: 16px;
+    cursor: pointer;
+}
+
+#animation-screen {
+    position: fixed;
+    inset: 0;
+    background: rgba(244, 239, 231, 0.95);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 99;
+    overflow: hidden;
+}
+
+.hidden {
+    display: none !important;
+}
+
+#animation-content {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+}
+
+/* Penguin wins animation */
+.poop-penguin {
+    position: absolute;
+    left: 10vw;
+    bottom: 18vh;
+    font-size: 90px;
+}
+
+.flying-seagull {
+    position: absolute;
+    right: 8vw;
+    top: 20vh;
+    font-size: 80px;
+    animation: seagullHit 5s linear forwards;
+}
+
+.poop {
+    position: absolute;
+    left: 24vw;
+    bottom: 30vh;
+    font-size: 45px;
+    animation: poopShoot 5s linear forwards;
+}
+
+@keyframes poopShoot {
+    0% {
+        transform: translate(0, 0) rotate(0deg);
+    }
+
+    45% {
+        transform: translate(43vw, -35vh) rotate(360deg);
+    }
+
+    100% {
+        transform: translate(43vw, -35vh) rotate(360deg);
+    }
+}
+
+@keyframes seagullHit {
+    0% {
+        transform: translate(0, 0) rotate(0deg);
+    }
+
+    45% {
+        transform: translate(-10vw, 5vh) rotate(0deg);
+    }
+
+    100% {
+        transform: translate(-25vw, 60vh) rotate(720deg);
+    }
+}
+
+/* Seagull wins animation */
+.carry-seagull {
+    position: absolute;
+    left: 10vw;
+    top: 35vh;
+    font-size: 90px;
+    animation: seagullCarry 5s linear forwards;
+}
+
+.carried-penguin {
+    position: absolute;
+    left: 16vw;
+    top: 45vh;
+    font-size: 75px;
+    animation: penguinCarried 5s linear forwards;
+}
+
+@keyframes seagullCarry {
+    0% {
+        transform: translate(0, 0);
+    }
+
+    100% {
+        transform: translate(90vw, -35vh);
+    }
+}
+
+@keyframes penguinCarried {
+    0% {
+        transform: translate(0, 0) rotate(0deg);
+    }
+
+    100% {
+        transform: translate(90vw, -35vh) rotate(30deg);
+    }
 }
