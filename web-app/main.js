@@ -235,6 +235,14 @@ function restartGame() {
     updateActivePlayerImage();
 }
 
+document.addEventListener("click", function () {
+
+    const bgm = document.getElementById("bgm");
+
+    bgm.play();
+
+}, { once: true });
+
 restartButton.addEventListener("click", restartGame);
 closeVideoButton.addEventListener("click", closeWinVideo);
 
