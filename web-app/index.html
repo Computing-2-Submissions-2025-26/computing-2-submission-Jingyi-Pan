@@ -1,26 +1,29 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Penguin vs Seagull Gomoku</title>
-    <link rel="stylesheet" href="default.css">
+<!DOCTYPE html> 
+<html lang="en"> 
+<head> 
+    <meta charset="UTF-8"> 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+    <title>Penguin vs Seagull Gomoku By QQJingyiPan</title> 
+    <link rel="stylesheet" href="default.css"> 
 </head>
+
 <audio
-    id="bgm"
-    src="bgm.mp3"
+    id="bgm" 
+    src="bgm.mp3" 
     autoplay
     loop
-></audio>
+></audio> 
 
 <body>
     <main>
         <h1>Penguin vs Seagull</h1>
 
         <p id="status">Penguin's turn</p>
-
+        <div id="skill-area">
+        <button id="remove-button">Remove Opponent Piece</button>
+        </div>
         <div id="game-area">
-            <img id="penguin-player" class="side-player active-player" src="penguin.jpg">
+            <img id="penguin-player" class="side-player active-player" src="penguin.jpg"> 
 
             <table id="board"></table>
 
@@ -29,10 +32,9 @@
 
         <button id="restart-button">Restart</button>
 
-        <div id="video-popup-screen" class="hidden">
+        <div id="video-popup-screen" class="hidden"> 
             <div id="video-popup">
                 <button id="close-video-button">×</button>
-
                 <video
                     id="win-video"
                     muted

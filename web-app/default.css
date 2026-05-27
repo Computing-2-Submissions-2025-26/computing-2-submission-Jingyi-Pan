@@ -357,3 +357,82 @@ td:hover {
         transform: scale(1.2) translateY(-18px);
     }
 }
+
+.obstacle {
+    background: #6f5a45 !important;
+    cursor: not-allowed;
+}
+
+.obstacle::before {
+    content: "🪨";
+    position: absolute;
+    inset: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: calc(var(--cell-size) * 0.55);
+}
+
+#skill-area {
+    display: flex;
+    gap: 12px;
+}
+
+#skill-area button {
+    padding: 8px 14px;
+    border: none;
+    border-radius: 999px;
+    background: #4f8fa8;
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+#skill-area button:hover {
+    filter: brightness(1.1);
+}
+
+#skill-area button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+main {
+    height: 100vh;
+    max-height: 100vh;
+    padding: 10px;
+    gap: 8px;
+}
+
+:root {
+    --board-size: min(68vw, 68vh);
+    --font-size-title: 26px;
+    --font-size-status: 18px;
+}
+
+#game-area {
+    gap: 18px;
+}
+
+.side-player {
+    width: clamp(60px, 10vw, 130px);
+    height: clamp(60px, 10vw, 130px);
+}
+
+#skill-area {
+    display: flex;
+    gap: 10px;
+}
+
+#skill-area button,
+#restart-button {
+    padding: 7px 14px;
+    font-size: 14px;
+}
