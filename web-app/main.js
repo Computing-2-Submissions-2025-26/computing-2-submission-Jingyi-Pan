@@ -12,6 +12,27 @@ const winVideo = document.getElementById("win-video");
 const penguinPlayer = document.getElementById("penguin-player");
 const seagullPlayer = document.getElementById("seagull-player");
 
+const penguinWinElement = document.getElementById("penguin-win");
+const penguinLossElement = document.getElementById("penguin-loss");
+const penguinDrawElement = document.getElementById("penguin-draw");
+
+const seagullWinElement = document.getElementById("seagull-win");
+const seagullLossElement = document.getElementById("seagull-loss");
+const seagullDrawElement = document.getElementById("seagull-draw");
+
+let scores = {
+    penguin: {
+        win: 0,
+        loss: 0,
+        draw: 0
+    },
+    seagull: {
+        win: 0,
+        loss: 0,
+        draw: 0
+    }
+};
+
 let board = [];
 let startingPlayer = "penguin";
 let currentPlayer = startingPlayer;
@@ -152,11 +173,30 @@ function handleCellClick(event) {
         showWinningCells(winningCells);
         statusElement.textContent = `${getPlayerName(currentPlayer)} wins!`; //HTML displays winning cell (highlight & jumping)
 
+        scores[currentPlayer].win += 1;
+        scores[getOpponent(currentPlayer)].loss += 1;
+        updateScoreDisplay();
+
         setTimeout(function () { //setTimeout is to delay the play of the video
             playWinVideo(currentPlayer);
         }, 600);
 
         return; // Stop further execution after winning
+    }
+
+    if (isDraw()) {
+        gameOver = true;
+        statusElement.textContent = "Draw!";
+
+        scores.penguin.draw += 1;
+        scores.seagull.draw += 1;
+        updateScoreDisplay();
+
+        setTimeout(function () {
+            playWinVideo("draw");
+        }, 600);
+
+        return;
     }
 
     switchPlayer();
@@ -370,13 +410,15 @@ function playWinVideo(winner) {
     videoPopupScreen.classList.remove("hidden");
 
     if (winner === "penguin") {
-        winVideo.src = "penguin-win.mp4"; // Set penguin winning video
+        winVideo.src = "penguin-win.mp4";
+    } else if (winner === "seagull") {
+        winVideo.src = "seagull-win.mp4";
     } else {
-        winVideo.src = "seagull-win.mp4"; 
+        winVideo.src = "draw-video.mp4";
     }
-
-    winVideo.currentTime = 0; // Reset the video to the beginning
-    winVideo.play(); // Play the winning video
+    winVideo.volume = 0.4;
+    winVideo.currentTime = 0;
+    winVideo.play();
 }
 
 /**
@@ -440,6 +482,29 @@ function restartGame() {
 
     createBoard();
     updateActivePlayerImage();
+    updateScoreDisplay();
+}
+
+function updateScoreDisplay() {
+    penguinWinElement.textContent = scores.penguin.win;
+    penguinLossElement.textContent = scores.penguin.loss;
+    penguinDrawElement.textContent = scores.penguin.draw;
+
+    seagullWinElement.textContent = scores.seagull.win;
+    seagullLossElement.textContent = scores.seagull.loss;
+    seagullDrawElement.textContent = scores.seagull.draw;
+}
+
+function isDraw() {
+    for (let row = 0; row < boardSize; row += 1) {
+        for (let col = 0; col < boardSize; col += 1) {
+            if (board[row][col] === "") {
+                return false;
+            }
+        }
+    }
+
+    return true;
 }
 
 document.addEventListener("click", function () { // Add a click event listener to the whole webpage
@@ -453,3 +518,4 @@ removeButton.addEventListener("click", startRemoveSkill);
 
 createBoard();
 updateActivePlayerImage();
+updateScoreDisplay();

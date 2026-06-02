@@ -1,39 +1,115 @@
 :root {
-    --board-size: min(82vw, 82vh);
+    /* Board */
+    --board-size: min(68vw, 68vh);
     --cell-size: calc(var(--board-size) / 15);
+    --board-border-width: 6px;
+    --board-border-radius: 14px;
+    --board-border-color: #b97a3f;
+    --board-light-cell: #f6d99a;
+    --board-dark-cell: #edc97e;
+    --board-grid-line: rgba(140, 95, 40, 0.28);
+    --obstacle-color: #6f5a45;
+
+    /* Fonts */
+    --font-family-main: "Baloo 2", cursive;
+    --font-size-title: 35px;
+    --font-size-status: 24px;
+    --font-size-button: 14px;
+    --font-size-score: 14px;
+    --font-size-close-button: 28px;
+    --font-size-obstacle: calc(var(--cell-size) * 0.55);
+
+    /* Colours */
     --text-color: #222;
     --button-color: #2f6f8f;
-    --button-text: white;
-    --font-size-title: 32px;
-    --font-size-status: 20px;
+    --skill-button-color: #4f8fa8;
+    --button-text-color: white;
+    --button-disabled-opacity: 0.45;
+
+    --score-background: rgba(255, 255, 255, 0.45);
+    --popup-background: rgba(0, 0, 0, 0.35);
+    --close-button-background: rgba(0, 0, 0, 0.65);
+    --close-button-hover-background: rgba(0, 0, 0, 0.85);
+    --video-background: black;
+
+    /* Background */
+    --sky-top: #8fd3ff;
+    --sky-bottom: #bfe8ff;
+    --sand-top: #f6e2b3;
+    --sand-bottom: #f3d79b;
+
+    /* Buttons */
+    --button-padding-y: 7px;
+    --button-padding-x: 14px;
+    --button-radius: 999px;
+
+    /* Player */
+    --player-size: clamp(60px, 10vw, 130px);
+    --player-inactive-opacity: 0.45;
+    --player-inactive-scale: 0.9;
+    --player-active-scale: 1.2;
+    --player-jump-height: -18px;
+
+    /* Layout */
+    --main-padding: 10px;
+    --main-gap: 8px;
+    --game-area-gap: 80px;
+    --skill-area-gap: 10px;
+    --player-panel-gap: 20px;
+    --score-box-width: 120px;
+    --score-box-padding: 10px;
+    --score-box-radius: 14px;
+
+    /* Shadows */
+    --board-shadow:
+        0 14px 35px rgba(150, 100, 40, 0.28),
+        inset 0 0 20px rgba(255, 255, 255, 0.18);
+    --button-shadow: 0 5px 12px rgba(0, 0, 0, 0.18);
+    --score-shadow: 0 6px 14px rgba(0, 0, 0, 0.18);
+    --player-shadow: drop-shadow(0 8px 14px rgba(0, 0, 0, 0.28));
+    --piece-shadow: drop-shadow(0 3px 4px rgba(0, 0, 0, 0.25));
+    --popup-shadow: 0 18px 45px rgba(0, 0, 0, 0.35);
+
+    /* Popup */
+    --popup-size: min(82vw, 82vh);
+    --popup-border-radius: 18px;
+    --close-button-size: 36px;
+    --close-button-position: 10px;
 }
 
 * {
     box-sizing: border-box;
 }
 
+html,
+body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
 body {
     margin: 0;
     min-height: 100vh;
-    font-family: Arial, sans-serif;
+    font-family: var(--font-family-main);
     color: var(--text-color);
-    background:
-        linear-gradient(
-            to bottom,
-            #8fd3ff 0%,
-            #bfe8ff 35%,
-            #f6e2b3 35%,
-            #f3d79b 100%
-        );
+
+    background-image: url("background.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
 main {
     min-height: 100vh;
+    height: 100vh;
+    max-height: 100vh;
+    padding: var(--main-padding);
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    gap: 12px;
+    gap: var(--main-gap);
 }
 
 h1 {
@@ -47,6 +123,13 @@ h1 {
     font-weight: bold;
 }
 
+#game-area {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: var(--game-area-gap);
+}
+
 #board {
     width: var(--board-size);
     height: var(--board-size);
@@ -54,15 +137,12 @@ h1 {
     border-collapse: collapse;
     table-layout: fixed;
 
-    border: 6px solid #b97a3f;
-
-    border-radius: 14px;
+    border: var(--board-border-width) solid var(--board-border-color);
+    border-radius: var(--board-border-radius);
 
     overflow: hidden;
 
-    box-shadow:
-        0 14px 35px rgba(150, 100, 40, 0.28),
-        inset 0 0 20px rgba(255, 255, 255, 0.18);
+    box-shadow: var(--board-shadow);
 }
 
 td {
@@ -80,19 +160,19 @@ td {
 
 /* 海滩风跳色棋盘 */
 tr:nth-child(odd) td:nth-child(odd) {
-    background: #f6d99a;
+    background: var(--board-light-cell);
 }
 
 tr:nth-child(odd) td:nth-child(even) {
-    background: #edc97e;
+    background: var(--board-dark-cell);
 }
 
 tr:nth-child(even) td:nth-child(odd) {
-    background: #edc97e;
+    background: var(--board-dark-cell);
 }
 
 tr:nth-child(even) td:nth-child(even) {
-    background: #f6d99a;
+    background: var(--board-light-cell);
 }
 
 /* 柔和网格线 */
@@ -100,7 +180,7 @@ td::after {
     content: "";
     position: absolute;
     inset: 0;
-    border: 1px solid rgba(140, 95, 40, 0.28);
+    border: 1px solid var(--board-grid-line);
     pointer-events: none;
 }
 
@@ -120,7 +200,7 @@ td:hover {
     animation: pop 0.18s ease-out;
     user-select: none;
     pointer-events: none;
-    filter: drop-shadow(0 3px 4px rgba(0, 0, 0, 0.25));
+    filter: var(--piece-shadow);
 }
 
 @keyframes pop {
@@ -148,14 +228,17 @@ td:hover {
 }
 
 #restart-button {
-    padding: 8px 18px;
+    padding:
+        var(--button-padding-y)
+        var(--button-padding-x);
+
     border: none;
-    border-radius: 999px;
+    border-radius: var(--button-radius);
     background: var(--button-color);
-    color: var(--button-text);
-    font-size: 16px;
+    color: var(--button-text-color);
+    font-size: var(--font-size-button);
     cursor: pointer;
-    box-shadow: 0 5px 12px rgba(0, 0, 0, 0.18);
+    box-shadow: var(--button-shadow);
 }
 
 #restart-button:hover {
@@ -166,7 +249,7 @@ td:hover {
     position: fixed;
     inset: 0;
 
-    background: rgba(0, 0, 0, 0.35);
+    background: var(--popup-background);
 
     display: flex;
     justify-content: center;
@@ -178,15 +261,15 @@ td:hover {
 #video-popup {
     position: relative;
 
-    width: min(82vw, 82vh);
+    width: var(--popup-size);
     aspect-ratio: 1 / 1;
 
-    background: #f6d99a;
+    background: var(--board-light-cell);
 
-    border: 6px solid #b97a3f;
-    border-radius: 18px;
+    border: var(--board-border-width) solid var(--board-border-color);
+    border-radius: var(--popup-border-radius);
 
-    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.35);
+    box-shadow: var(--popup-shadow);
 
     overflow: hidden;
 }
@@ -199,25 +282,25 @@ td:hover {
 
     display: block;
 
-    background: black;
+    background: var(--video-background);
 }
 
 #close-video-button {
     position: absolute;
-    top: 10px;
-    right: 10px;
+    top: var(--close-button-position);
+    right: var(--close-button-position);
 
-    width: 36px;
-    height: 36px;
+    width: var(--close-button-size);
+    height: var(--close-button-size);
 
     border: none;
     border-radius: 50%;
 
-    background: rgba(0, 0, 0, 0.65);
-    color: white;
+    background: var(--close-button-background);
+    color: var(--button-text-color);
 
-    font-size: 28px;
-    line-height: 36px;
+    font-size: var(--font-size-close-button);
+    line-height: var(--close-button-size);
 
     cursor: pointer;
 
@@ -225,7 +308,7 @@ td:hover {
 }
 
 #close-video-button:hover {
-    background: rgba(0, 0, 0, 0.85);
+    background: var(--close-button-hover-background);
 }
 
 .hidden {
@@ -322,19 +405,12 @@ td:hover {
     }
 }
 
-#game-area {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 28px;
-}
-
 .side-player {
-    width: clamp(80px, 12vw, 180px);
-    height: clamp(80px, 12vw, 180px);
+    width: var(--player-size);
+    height: var(--player-size);
     object-fit: contain;
-    opacity: 0.45;
-    transform: scale(0.9);
+    opacity: var(--player-inactive-opacity);
+    transform: scale(var(--player-inactive-scale));
     transition:
         transform 0.25s,
         opacity 0.25s,
@@ -343,23 +419,25 @@ td:hover {
 
 .active-player {
     opacity: 1;
-    transform: scale(1.2);
-    filter: drop-shadow(0 8px 14px rgba(0, 0, 0, 0.28));
+    transform: scale(var(--player-active-scale));
+    filter: var(--player-shadow);
     animation: playerJump 0.6s infinite alternate ease-in-out;
 }
 
 @keyframes playerJump {
     from {
-        transform: scale(1.2) translateY(0);
+        transform: scale(var(--player-active-scale)) translateY(0);
     }
 
     to {
-        transform: scale(1.2) translateY(-18px);
+        transform:
+            scale(var(--player-active-scale))
+            translateY(var(--player-jump-height));
     }
 }
 
 .obstacle {
-    background: #6f5a45 !important;
+    background: var(--obstacle-color) !important;
     cursor: not-allowed;
 }
 
@@ -370,21 +448,24 @@ td:hover {
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: calc(var(--cell-size) * 0.55);
+    font-size: var(--font-size-obstacle);
 }
 
 #skill-area {
     display: flex;
-    gap: 12px;
+    gap: var(--skill-area-gap);
 }
 
 #skill-area button {
-    padding: 8px 14px;
+    padding:
+        var(--button-padding-y)
+        var(--button-padding-x);
+
     border: none;
-    border-radius: 999px;
-    background: #4f8fa8;
-    color: white;
-    font-size: 14px;
+    border-radius: var(--button-radius);
+    background: var(--skill-button-color);
+    color: var(--button-text-color);
+    font-size: var(--font-size-button);
     cursor: pointer;
 }
 
@@ -393,46 +474,29 @@ td:hover {
 }
 
 #skill-area button:disabled {
-    opacity: 0.45;
+    opacity: var(--button-disabled-opacity);
     cursor: not-allowed;
 }
 
-html,
-body {
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-}
-
-main {
-    height: 100vh;
-    max-height: 100vh;
-    padding: 10px;
-    gap: 8px;
-}
-
-:root {
-    --board-size: min(68vw, 68vh);
-    --font-size-title: 26px;
-    --font-size-status: 18px;
-}
-
-#game-area {
-    gap: 18px;
-}
-
-.side-player {
-    width: clamp(60px, 10vw, 130px);
-    height: clamp(60px, 10vw, 130px);
-}
-
-#skill-area {
+.player-panel {
     display: flex;
-    gap: 10px;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--player-panel-gap);
 }
 
-#skill-area button,
-#restart-button {
-    padding: 7px 14px;
-    font-size: 14px;
+.score-box {
+    width: var(--score-box-width);
+    padding: var(--score-box-padding);
+    border-radius: var(--score-box-radius);
+    background: var(--score-background);
+    backdrop-filter: blur(4px);
+    text-align: center;
+    font-weight: bold;
+    box-shadow: var(--score-shadow);
+}
+
+.score-box p {
+    margin: 4px 0;
+    font-size: var(--font-size-score);
 }

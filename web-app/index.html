@@ -23,11 +23,25 @@
         <button id="remove-button">Remove Opponent Piece</button>
         </div>
         <div id="game-area">
-            <img id="penguin-player" class="side-player active-player" src="penguin.jpg"> 
+<div class="player-panel">
+    <img id="penguin-player" class="side-player active-player" src="penguin.jpg">
+    <div class="score-box">
+        <p>Win: <span id="penguin-win">0</span></p>
+        <p>Loss: <span id="penguin-loss">0</span></p>
+        <p>Draw: <span id="penguin-draw">0</span></p>
+    </div>
+</div>
 
-            <table id="board"></table>
+<table id="board"></table>
 
+        <div class="player-panel">
             <img id="seagull-player" class="side-player" src="seagull.jpg">
+            <div class="score-box">
+                <p>Win: <span id="seagull-win">0</span></p>
+                <p>Loss: <span id="seagull-loss">0</span></p>
+                <p>Draw: <span id="seagull-draw">0</span></p>
+            </div>
+        </div>
         </div>
 
         <button id="restart-button">Restart</button>
@@ -37,9 +51,7 @@
                 <button id="close-video-button">×</button>
                 <video
                     id="win-video"
-                    muted
                     playsinline
-                    controls
                 ></video>
             </div>
         </div>
