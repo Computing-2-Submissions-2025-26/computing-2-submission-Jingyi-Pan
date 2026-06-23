@@ -442,13 +442,14 @@ td:hover {
 }
 
 .obstacle::before {
-    content: "🪨";
+    content: "";
     position: absolute;
     inset: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: var(--font-size-obstacle);
+
+    background-image: url("rock.jpg");
+    background-size: 80%;
+    background-repeat: no-repeat;
+    background-position: center;
 }
 
 #skill-area {
@@ -499,4 +500,10 @@ td:hover {
 .score-box p {
     margin: 4px 0;
     font-size: var(--font-size-score);
+}
+
+td:focus {
+    outline: 2px solid #878a8b;
+    outline-offset: -2px;
+    z-index: 5;
 }

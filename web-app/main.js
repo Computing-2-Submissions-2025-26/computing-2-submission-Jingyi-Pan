@@ -1,4 +1,17 @@
-const boardSize = 15;
+import {
+    getBoardSize,
+    getBoard,
+    getCurrentPlayer,
+    getScores,
+    getRemoveMode,
+    getSkillsUsed,
+    getPlayerName,
+    createBoardData,
+    placeMove,
+    startRemoveSkill,
+    removeOpponentPiece,
+    restartGameData
+} from "./game-logic.js";
 
 const boardElement = document.getElementById("board");
 const statusElement = document.getElementById("status");
@@ -20,51 +33,125 @@ const seagullWinElement = document.getElementById("seagull-win");
 const seagullLossElement = document.getElementById("seagull-loss");
 const seagullDrawElement = document.getElementById("seagull-draw");
 
-let scores = {
-    penguin: {
-        win: 0,
-        loss: 0,
-        draw: 0
-    },
-    seagull: {
-        win: 0,
-        loss: 0,
-        draw: 0
+let cursorRow = 0;
+let cursorCol = 0;
+
+function renderBoard() {
+    boardElement.innerHTML = "";
+
+    const boardSize = getBoardSize();
+    const board = getBoard();
+
+    for (let row = 0; row < boardSize; row += 1) {
+        const tableRow = document.createElement("tr");
+
+        for (let col = 0; col < boardSize; col += 1) {
+            const cell = document.createElement("td");
+
+            cell.dataset.row = row;
+            cell.dataset.col = col;
+
+            cell.setAttribute("tabindex", "0");
+            cell.addEventListener("keydown", handleCellKeydown);
+
+            if (board[row][col] === "obstacle") {
+                cell.classList.add("obstacle");
+            }
+
+            cell.addEventListener("click", handleCellClick);
+            tableRow.appendChild(cell);
+        }
+
+        boardElement.appendChild(tableRow);
     }
-};
+}
 
-let board = [];
-let startingPlayer = "penguin";
-let currentPlayer = startingPlayer;
-let gameOver = false;
+function handleCellClick(event) {
+    const cell = event.currentTarget;
 
-let removeMode = false;
-let layoutIndex = 0;
+    const row = Number(cell.dataset.row);
+    const col = Number(cell.dataset.col);
 
-const obstacleLayouts = [
-    [2, 5, 8, 11, 14, 1, 4, 7, 10, 13, 0, 3, 6, 9, 12],
-    [7, 10, 13, 1, 4, 8, 11, 14, 2, 5, 9, 12, 0, 3, 6],
-    [0, 4, 8, 12, 1, 5, 9, 13, 2, 6, 10, 14, 3, 7, 11],
-    [14, 11, 8, 5, 2, 13, 10, 7, 4, 1, 12, 9, 6, 3, 0],
-    [3, 9, 0, 6, 12, 4, 10, 1, 7, 13, 5, 11, 2, 8, 14]
-];
+    const board = getBoard();
 
-let skillsUsed = {
-    penguin: {
-        remove: false
-    },
-    seagull: {
-        remove: false
+    if (board[row][col] === "obstacle") {
+        return;
     }
-};
 
-/**
- * Update current player, show who's turn now
- * Adds the "active-player" class to the current player's image and removes it 
- * from the other player's image
- * '.active-palyer' is to make the image jump, be bigger, and highlight
- */
+    if (getRemoveMode()) {
+        const result = removeOpponentPiece(row, col);
+
+        statusElement.textContent = result.message;
+
+        if (result.success) {
+            cell.innerHTML = "";
+        }
+
+        updateSkillButtons();
+        return;
+    }
+
+    if (board[row][col] !== "") {
+        return;
+    }
+
+    const player = getCurrentPlayer();
+
+    const result = placeMove(row, col);
+
+    if (!result.success) {
+        return;
+    }
+
+    placePiece(cell, player);
+
+    statusElement.textContent = result.message;
+
+    if (result.type === "win") {
+        showWinningCells(result.winningCells);
+        updateScoreDisplay();
+
+        setTimeout(function () {
+            playWinVideo(result.player);
+        }, 600);
+
+        return;
+    }
+
+    if (result.type === "draw") {
+        updateScoreDisplay();
+
+        setTimeout(function () {
+            playWinVideo("draw");
+        }, 600);
+
+        return;
+    }
+
+    updateActivePlayerImage();
+    updateSkillButtons();
+}
+
+function placePiece(cell, player) {
+    const piece = document.createElement("img");
+
+    piece.classList.add("piece");
+
+    if (player === "penguin") {
+        piece.src = "penguin.jpg";
+        piece.alt = "Penguin";
+    } else {
+        piece.src = "seagull.jpg";
+        piece.alt = "Seagull";
+    }
+
+    piece.draggable = false;
+    cell.appendChild(piece);
+}
+
 function updateActivePlayerImage() {
+    const currentPlayer = getCurrentPlayer();
+
     if (currentPlayer === "penguin") {
         penguinPlayer.classList.add("active-player");
         seagullPlayer.classList.remove("active-player");
@@ -76,336 +163,41 @@ function updateActivePlayerImage() {
     updateSkillButtons();
 }
 
-/**
- * check if the skill button has already used once by the user
- */
 function updateSkillButtons() {
+    const currentPlayer = getCurrentPlayer();
+    const skillsUsed = getSkillsUsed();
+
     removeButton.disabled = skillsUsed[currentPlayer].remove;
 }
 
-/**
- * create game board
- * 1. clear the old board
- * 2. Reset game state
- * 3. Load obstacle layout
- * 4. create rows
- * 5. create cells
- * 6. store coordinates
- * 7. add click events
- * 8. add obstacles
- * 9. build HTML board
- * 10. save board data
- */
-function createBoard() {
-    boardElement.innerHTML = ""; //clear every element in the board in HTML
-    board = []; //clear data elemnt in js
-    removeMode = false; //refresh the 'remove' skill when every new round of game starts
+function handleRemoveButtonClick() {
+    const result = startRemoveSkill();
 
-    const currentLayout = obstacleLayouts[layoutIndex];  //get the obstacle layout of that round of game
-
-    for (let row = 0; row < boardSize; row += 1) {
-        const rowData = [];
-        const tableRow = document.createElement("tr"); //create row element in HTML
-
-        for (let col = 0; col < boardSize; col += 1) {
-            const cell = document.createElement("td"); //create each block's data element
-
-            cell.dataset.row = row; //store coordinate
-            cell.dataset.col = col; //store coordinate 
-            //what is cell.dataset.row（这是表示？）
-            cell.addEventListener("click", handleCellClick); 
-            //addEventListner是什么 （https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener）
-            if (col === currentLayout[row]) { // Check if this position should contain an obstacle
-                rowData.push("obstacle"); // Save obstacle data into the board array
-                cell.classList.add("obstacle"); // Add obstacle CSS class to the cell
-            } else {
-                rowData.push(""); // Save empty cell data into the board array
-            }
-
-            tableRow.appendChild(cell);   // Add the cell into the current table row
-        }
-
-        board.push(rowData); // Add the completed row data into the board array
-        boardElement.appendChild(tableRow); // Add the completed table row into the HTML board
-    }
-}
-
-
-/**
-  * This is the function to respond users click to the cell
- * 1. chech the game is over
- * 2. get the position of the clicked cell
- * 3. if in remove mode, move
- * 4. if not in remove mode, check if the cell is empty
- * 5. if is empty, place the current player's piece
- * 6. check winning condition
- * 7. end the game if win and give highlight and aninmation
- * 8. switch player
- * @param {MouseEvent} event The click event from the selected cell
- * @returns {void}
- */
-function handleCellClick(event) {
-    if (gameOver) { //if game is over, stop the function
+    if (!result.success) {
         return;
     }
 
-    const cell = event.currentTarget; //The currentTarget read-only property of the Event interface 
-    // identifies the element to which the event handler has been attached.
-    const row = Number(cell.dataset.row); //get row of the cell
-    const col = Number(cell.dataset.col); //get column of the cell
-
-    if (removeMode) {
-        removeOpponentPiece(row, col, cell); //remove the cell clicked if ot is in remove mode
-        return;
-    }
-
-    if (board[row][col] !== "") {
-        return; // if the cell is already occupied, cannot put there
-    }
-
-    board[row][col] = currentPlayer; //place chess in the current cell of the board (only modified the data)
-    placePiece(cell, currentPlayer); //place chess in the HTML (modified the webpagedisplacement)
-
-    const winningCells = getWinningCells(row, col, currentPlayer); //get winning cells
-
-    if (winningCells.length >= 5) { //check winning or not
-        gameOver = true; //mark the game is over
-        showWinningCells(winningCells);
-        statusElement.textContent = `${getPlayerName(currentPlayer)} wins!`; //HTML displays winning cell (highlight & jumping)
-
-        scores[currentPlayer].win += 1;
-        scores[getOpponent(currentPlayer)].loss += 1;
-        updateScoreDisplay();
-
-        setTimeout(function () { //setTimeout is to delay the play of the video
-            playWinVideo(currentPlayer);
-        }, 600);
-
-        return; // Stop further execution after winning
-    }
-
-    if (isDraw()) {
-        gameOver = true;
-        statusElement.textContent = "Draw!";
-
-        scores.penguin.draw += 1;
-        scores.seagull.draw += 1;
-        updateScoreDisplay();
-
-        setTimeout(function () {
-            playWinVideo("draw");
-        }, 600);
-
-        return;
-    }
-
-    switchPlayer();
-}
-
-/**
- * Place the penguin/seagual chess image when player placed them in a cell
- * @param {HTMLElement} cell The user selected cell
- * @param {string} player THe current player placing the piece
- */
-function placePiece(cell, player) {
-    const piece = document.createElement("img"); //create a new image element
-    piece.classList.add("piece"); // Add CSS class for piece styling
-
-    if (player === "penguin") {
-        piece.src = "penguin.jpg"; //piece.scr is to load the picture
-        piece.alt = "Penguin"; // Set alternative text for accessibility
-    } else {
-        piece.src = "seagull.jpg";
-        piece.alt = "Seagull";
-    }
-
-    piece.draggable = false; //cannot drag the picture
-    cell.appendChild(piece); //Add the image element into the selected board cell
-}
-
-/**
- * switch player 
- * update the player's highlight image
- * update the text on the webpage
- */
-function switchPlayer() {
-    removeMode = false;
-
-    if (currentPlayer === "penguin") {
-        currentPlayer = "seagull";
-        statusElement.textContent = "Seagull's turn";
-    } else {
-        currentPlayer = "penguin";
-        statusElement.textContent = "Penguin's turn";
-    }
-
-    updateActivePlayerImage();
-}
-
-/**
- * 
- * @param {string} player The current player name
- * @returns {string} The formatted player name
- */
-function getPlayerName(player) {
-    if (player === "penguin") {
-        return "Penguin";
-    }
-    return "Seagull";
-}
-
-/**
- * 
- * @param {string} player The current player name
- * @returns string The opposite player name
- */
-function getOpponent(player) {
-    if (player === "penguin") {
-        return "seagull";
-    }
-
-    return "penguin";
-}
-
-/**
- * 1. check if the game is over and the current player's skill is used already
- * 2. enable the remove skill
- * @returns {void}
- */
-function startRemoveSkill() {
-    if (gameOver || skillsUsed[currentPlayer].remove) {
-        return;
-    }
-
-    removeMode = true;
-    statusElement.textContent = `${getPlayerName(currentPlayer)}: choose one opponent piece to remove`;
-}
-
-/**
- * the skill to remove oppoents piece
- * check if the clicked chess is the opponents' cell
- * remove the chess in the cell
- * update status
- */
-function removeOpponentPiece(row, col, cell) {
-    const opponent = getOpponent(currentPlayer);
-
-    if (board[row][col] !== opponent) {
-        statusElement.textContent = "You can only remove opponent's piece";
-        return;
-    }
-
-    board[row][col] = ""; //remove the cell's data in .js
-    cell.innerHTML = ""; //remove the cell's data in HTML
-
-    skillsUsed[currentPlayer].remove = true;
-    removeMode = false;
-
-    statusElement.textContent = `${getPlayerName(currentPlayer)} removed one opponent piece`;
-
+    statusElement.textContent = result.message;
     updateSkillButtons();
 }
 
-/**
- * search in four directions from the current cell
- * search for all the connected player cell in a array and check how many chess are connected together
- * !!! important
- * @param {number} row the row index of current chess
- * @param {number} col the column index of current chess
- * @param {string} player the current player
- * @returns {number[][]} the list of winning cell position
- */
-function getWinningCells(row, col, player) {
-    const directions = [
-        [0, 1],
-        [1, 0],
-        [1, 1],
-        [1, -1]
-    ];
-
-    for (const direction of directions) { //check the four firections one by one
-        const rowDirection = direction[0];
-        const colDirection = direction[1];
-
-        const cells = [
-            ...collectCells(row, col, -rowDirection, -colDirection, player).reverse(), // ... is to spread the cell
-            [row, col], //serach on the opposite direction （https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_syntax）
-            ...collectCells(row, col, rowDirection, colDirection, player)
-        ];
-
-        if (cells.length >= 5) {
-            return cells.slice(0, 5);
-        }
-    }
-
-    return [];
-}
-
-/**
- * Collect connected player pieces in one direction.
- * 1. Starts from the current piece position
- * 2. Moves step-by-step in the given direction
- * 3. Collects all connected pieces belonging to the same player
- * 4. Stops when reaching the board boundary or a different piece
- * @param {number} row the row index of the current chess
- * @param {number} col the column index of the current chess
- * @param {number} rowDirection 1/-1/0, indicating the row moving direction
- * @param {number} colDirection 1/-1/0, indicatin the column moving direction
- * @param {string} player the current player 
- * @returns {number[][]} A list of connected cell positions
- */
-function collectCells(row, col, rowDirection, colDirection, player) {
-    const cells = [];
-
-    let nextRow = row + rowDirection;
-    let nextCol = col + colDirection;
-
-    while (
-        nextRow >= 0 &&
-        nextRow < boardSize &&
-        nextCol >= 0 &&
-        nextCol < boardSize &&
-        board[nextRow][nextCol] === player
-    ) {
-        cells.push([nextRow, nextCol]);
-
-        nextRow += rowDirection;
-        nextCol += colDirection;
-    }
-
-    return cells;
-}
-
-/**
- * Highlight all winning pieces on the board.
- * 
- * 1. Loops through all winning cell positions
- * 2. Finds the matching HTML board cells
- * 3. Finds the piece image inside each cell
- * 4. Adds the winning-piece CSS class for animation effects
- * @param {*} winningCells 
- */
 function showWinningCells(winningCells) {
-    for (const cellPosition of winningCells) { // Loop through every winning cell position
+    for (const cellPosition of winningCells) {
         const row = cellPosition[0];
         const col = cellPosition[1];
 
         const cell = document.querySelector(
-            `td[data-row="${row}"][data-col="${col}"]` //// Find the matching HTML table cell using a CSS selector
+            `td[data-row="${row}"][data-col="${col}"]`
         );
 
-        const piece = cell.querySelector(".piece"); // find the jpg in the cell
+        const piece = cell.querySelector(".piece");
 
         if (piece !== null) {
-            piece.classList.add("winning-piece"); // Add winning animation CSS class to the piece
+            piece.classList.add("winning-piece");
         }
     }
 }
 
-/**
-* play different video when different player wins
-* @param {string} winner winning player anme
-*/
 function playWinVideo(winner) {
     videoPopupScreen.classList.remove("hidden");
 
@@ -416,76 +208,38 @@ function playWinVideo(winner) {
     } else {
         winVideo.src = "draw-video.mp4";
     }
+
     winVideo.volume = 0.4;
     winVideo.currentTime = 0;
     winVideo.play();
 }
 
-/**
- * close the winning pop up window and restart
- * 
- */
 function closeWinVideo() {
     winVideo.pause();
-    winVideo.src = "";  // Remove the current video source
+    winVideo.src = "";
 
-    videoPopupScreen.classList.add("hidden");  // Hide the video popup screen
+    videoPopupScreen.classList.add("hidden");
 
     restartGame();
 }
 
-/**
- * Restart the game and reset all game states.
- * 
- * 1. Switches to the next obstacle layout
- * 2. Alternates the starting player
- * 3. Resets game status variables
- * 4. Resets player skill usage
- * 5. Updates the game status text
- * 6. Hides and clears the win video popup
- * 7. Recreates the board
- * 8. Updates the active player highlight
- * 
- * @returns {void}
- */
 function restartGame() {
-    layoutIndex += 1; //change obstacle map
+    const result = restartGameData();
 
-    if (layoutIndex >= obstacleLayouts.length) {
-        layoutIndex = 0;
-    }
-
-    if (startingPlayer === "penguin") {
-        startingPlayer = "seagull";
-    } else {
-        startingPlayer = "penguin";
-    }
-
-    currentPlayer = startingPlayer;
-    gameOver = false;
-    removeMode = false;
-
-    skillsUsed = {
-        penguin: {
-            remove: false
-        },
-        seagull: {
-            remove: false
-        }
-    };
-
-    statusElement.textContent = `${getPlayerName(currentPlayer)}'s turn`;
+    statusElement.textContent = result.message;
 
     videoPopupScreen.classList.add("hidden");
     winVideo.pause();
     winVideo.src = "";
 
-    createBoard();
+    renderBoard();
     updateActivePlayerImage();
     updateScoreDisplay();
 }
 
 function updateScoreDisplay() {
+    const scores = getScores();
+
     penguinWinElement.textContent = scores.penguin.win;
     penguinLossElement.textContent = scores.penguin.loss;
     penguinDrawElement.textContent = scores.penguin.draw;
@@ -495,27 +249,77 @@ function updateScoreDisplay() {
     seagullDrawElement.textContent = scores.seagull.draw;
 }
 
-function isDraw() {
-    for (let row = 0; row < boardSize; row += 1) {
-        for (let col = 0; col < boardSize; col += 1) {
-            if (board[row][col] === "") {
-                return false;
-            }
-        }
-    }
+function handleCellKeydown(event) {
+    const cell = event.currentTarget;
 
-    return true;
+    cursorRow = Number(cell.dataset.row);
+    cursorCol = Number(cell.dataset.col);
+
+    if (event.key === "ArrowUp") {
+        event.preventDefault();
+        moveCursor(-1, 0);
+    } else if (event.key === "ArrowDown") {
+        event.preventDefault();
+        moveCursor(1, 0);
+    } else if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        moveCursor(0, -1);
+    } else if (event.key === "ArrowRight") {
+        event.preventDefault();
+        moveCursor(0, 1);
+    } else if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        cell.click();
+    }
 }
 
-document.addEventListener("click", function () { // Add a click event listener to the whole webpage
-    const bgm = document.getElementById("bgm"); // Find the background music audio element
-    bgm.play(); //play background music
-}, { once: true }); // Ensure the click event only runs once
+function moveCursor(rowChange, colChange) {
+    const boardSize = getBoardSize();
+
+    cursorRow += rowChange;
+    cursorCol += colChange;
+
+    if (cursorRow < 0) {
+        cursorRow = 0;
+    }
+
+    if (cursorRow >= boardSize) {
+        cursorRow = boardSize - 1;
+    }
+
+    if (cursorCol < 0) {
+        cursorCol = 0;
+    }
+
+    if (cursorCol >= boardSize) {
+        cursorCol = boardSize - 1;
+    }
+
+    const nextCell = document.querySelector(
+        `td[data-row="${cursorRow}"][data-col="${cursorCol}"]`
+    );
+
+    if (nextCell !== null) {
+        nextCell.focus();
+    }
+}
+
+document.addEventListener("click", function () {
+    const bgm = document.getElementById("bgm");
+    bgm.play();
+}, { once: true });
 
 restartButton.addEventListener("click", restartGame);
 closeVideoButton.addEventListener("click", closeWinVideo);
-removeButton.addEventListener("click", startRemoveSkill);
+removeButton.addEventListener("click", handleRemoveButtonClick);
 
-createBoard();
+createBoardData();
+renderBoard();
 updateActivePlayerImage();
 updateScoreDisplay();
+
+const firstCell = document.querySelector('td[data-row="0"][data-col="0"]');
+
+if (firstCell !== null) {
+    firstCell.focus();
+}

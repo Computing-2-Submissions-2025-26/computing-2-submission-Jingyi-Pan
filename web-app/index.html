@@ -7,41 +7,55 @@
     <link rel="stylesheet" href="default.css"> 
 </head>
 
-<audio
-    id="bgm" 
-    src="bgm.mp3" 
-    autoplay
-    loop
-></audio> 
-
 <body>
+    <audio
+        id="bgm" 
+        src="bgm.mp3" 
+        autoplay
+        loop
+    ></audio> 
+
     <main>
         <h1>Penguin vs Seagull</h1>
 
         <p id="status">Penguin's turn</p>
+
         <div id="skill-area">
-        <button id="remove-button">Remove Opponent Piece</button>
+            <button id="remove-button">Remove Opponent Piece</button>
         </div>
+
         <div id="game-area">
-<div class="player-panel">
-    <img id="penguin-player" class="side-player active-player" src="penguin.jpg">
-    <div class="score-box">
-        <p>Win: <span id="penguin-win">0</span></p>
-        <p>Loss: <span id="penguin-loss">0</span></p>
-        <p>Draw: <span id="penguin-draw">0</span></p>
-    </div>
-</div>
+            <div class="player-panel">
+                <img
+                    id="penguin-player"
+                    class="side-player active-player"
+                    src="penguin.jpg"
+                    alt="Penguin player"
+                >
 
-<table id="board"></table>
-
-        <div class="player-panel">
-            <img id="seagull-player" class="side-player" src="seagull.jpg">
-            <div class="score-box">
-                <p>Win: <span id="seagull-win">0</span></p>
-                <p>Loss: <span id="seagull-loss">0</span></p>
-                <p>Draw: <span id="seagull-draw">0</span></p>
+                <div class="score-box">
+                    <p>Win: <span id="penguin-win">0</span></p>
+                    <p>Loss: <span id="penguin-loss">0</span></p>
+                    <p>Draw: <span id="penguin-draw">0</span></p>
+                </div>
             </div>
-        </div>
+
+            <table id="board"></table>
+
+            <div class="player-panel">
+                <img
+                    id="seagull-player"
+                    class="side-player"
+                    src="seagull.jpg"
+                    alt="Seagull player"
+                >
+
+                <div class="score-box">
+                    <p>Win: <span id="seagull-win">0</span></p>
+                    <p>Loss: <span id="seagull-loss">0</span></p>
+                    <p>Draw: <span id="seagull-draw">0</span></p>
+                </div>
+            </div>
         </div>
 
         <button id="restart-button">Restart</button>
@@ -49,6 +63,7 @@
         <div id="video-popup-screen" class="hidden"> 
             <div id="video-popup">
                 <button id="close-video-button">×</button>
+
                 <video
                     id="win-video"
                     playsinline
@@ -57,6 +72,6 @@
         </div>
     </main>
 
-    <script src="main.js"></script>
+    <script type="module" src="main.js"></script>
 </body>
 </html>
