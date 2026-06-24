@@ -126,7 +126,7 @@ h1 {
 #game-area {
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start;
     gap: var(--game-area-gap);
 }
 
@@ -506,4 +506,26 @@ td:focus {
     outline: 2px solid #878a8b;
     outline-offset: -2px;
     z-index: 5;
+}
+
+.info-box {
+    width: var(--score-box-width);
+    padding: var(--score-box-padding);
+    border-radius: var(--score-box-radius);
+    background: var(--score-background);
+    backdrop-filter: blur(4px);
+    text-align: center;
+    font-weight: bold;
+    box-shadow: var(--score-shadow);
+}
+
+.info-box h3 {
+    margin: 0 0 6px 0;
+    font-size: var(--font-size-score);
+}
+
+.info-box p {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.25;
 }

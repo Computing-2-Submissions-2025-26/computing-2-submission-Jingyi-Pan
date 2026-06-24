@@ -29,7 +29,7 @@
 <nav >
     
     
-    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#closeWinVideo">closeWinVideo</a></li><li><a href="global.html#collectCells">collectCells</a></li><li><a href="global.html#createBoard">createBoard</a></li><li><a href="global.html#getOpponent">getOpponent</a></li><li><a href="global.html#getPlayerName">getPlayerName</a></li><li><a href="global.html#getWinningCells">getWinningCells</a></li><li><a href="global.html#handleCellClick">handleCellClick</a></li><li><a href="global.html#placePiece">placePiece</a></li><li><a href="global.html#playWinVideo">playWinVideo</a></li><li><a href="global.html#removeOpponentPiece">removeOpponentPiece</a></li><li><a href="global.html#restartGame">restartGame</a></li><li><a href="global.html#showWinningCells">showWinningCells</a></li><li><a href="global.html#startRemoveSkill">startRemoveSkill</a></li><li><a href="global.html#switchPlayer">switchPlayer</a></li><li><a href="global.html#updateActivePlayerImage">updateActivePlayerImage</a></li><li><a href="global.html#updateSkillButtons">updateSkillButtons</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-GameLogic.html">GameLogic</a><ul class='methods'><li data-type='method'><a href="module-GameLogic.html#~collectCells">collectCells</a></li><li data-type='method'><a href="module-GameLogic.html#~createBoardData">createBoardData</a></li><li data-type='method'><a href="module-GameLogic.html#~getOpponent">getOpponent</a></li><li data-type='method'><a href="module-GameLogic.html#~getPlayerName">getPlayerName</a></li><li data-type='method'><a href="module-GameLogic.html#~getWinningCells">getWinningCells</a></li><li data-type='method'><a href="module-GameLogic.html#~isDraw">isDraw</a></li><li data-type='method'><a href="module-GameLogic.html#~placeMove">placeMove</a></li><li data-type='method'><a href="module-GameLogic.html#~removeOpponentPiece">removeOpponentPiece</a></li><li data-type='method'><a href="module-GameLogic.html#~restartGameData">restartGameData</a></li><li data-type='method'><a href="module-GameLogic.html#~startRemoveSkill">startRemoveSkill</a></li><li data-type='method'><a href="module-GameLogic.html#~switchPlayer">switchPlayer</a></li></ul></li></ul><h3>Global</h3><ul><li><a href="global.html#closeWinVideo">closeWinVideo</a></li><li><a href="global.html#handleCellClick">handleCellClick</a></li><li><a href="global.html#handleCellKeydown">handleCellKeydown</a></li><li><a href="global.html#handleRemoveButtonClick">handleRemoveButtonClick</a></li><li><a href="global.html#moveCursor">moveCursor</a></li><li><a href="global.html#placePiece">placePiece</a></li><li><a href="global.html#playWinVideo">playWinVideo</a></li><li><a href="global.html#renderBoard">renderBoard</a></li><li><a href="global.html#restartGame">restartGame</a></li><li><a href="global.html#showWinningCells">showWinningCells</a></li><li><a href="global.html#updateActivePlayerImage">updateActivePlayerImage</a></li><li><a href="global.html#updateScoreDisplay">updateScoreDisplay</a></li><li><a href="global.html#updateSkillButtons">updateSkillButtons</a></li></ul>
     
 </nav>
 
@@ -45,7 +45,19 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>const boardSize = 15;
+            <pre class="prettyprint source linenums"><code>import {
+    getBoardSize,
+    getBoard,
+    getCurrentPlayer,
+    getScores,
+    getRemoveMode,
+    getSkillsUsed,
+    createBoardData,
+    placeMove,
+    startRemoveSkill,
+    removeOpponentPiece,
+    restartGameData
+} from "./game-logic.js";
 
 const boardElement = document.getElementById("board");
 const statusElement = document.getElementById("status");
@@ -59,106 +71,76 @@ const winVideo = document.getElementById("win-video");
 const penguinPlayer = document.getElementById("penguin-player");
 const seagullPlayer = document.getElementById("seagull-player");
 
-let board = [];
-let startingPlayer = "penguin";
-let currentPlayer = startingPlayer;
-let gameOver = false;
+const penguinWinElement = document.getElementById("penguin-win");
+const penguinLossElement = document.getElementById("penguin-loss");
+const penguinDrawElement = document.getElementById("penguin-draw");
 
-let removeMode = false;
-let layoutIndex = 0;
+const seagullWinElement = document.getElementById("seagull-win");
+const seagullLossElement = document.getElementById("seagull-loss");
+const seagullDrawElement = document.getElementById("seagull-draw");
 
-const obstacleLayouts = [
-    [2, 5, 8, 11, 14, 1, 4, 7, 10, 13, 0, 3, 6, 9, 12],
-    [7, 10, 13, 1, 4, 8, 11, 14, 2, 5, 9, 12, 0, 3, 6],
-    [0, 4, 8, 12, 1, 5, 9, 13, 2, 6, 10, 14, 3, 7, 11],
-    [14, 11, 8, 5, 2, 13, 10, 7, 4, 1, 12, 9, 6, 3, 0],
-    [3, 9, 0, 6, 12, 4, 10, 1, 7, 13, 5, 11, 2, 8, 14]
-];
+let cursorRow = 0;
+let cursorCol = 0;
+let renderBoard;
+let handleCellClick;
+let placePiece;
+let updateActivePlayerImage;
+let updateSkillButtons;
+let handleRemoveButtonClick;
+let showWinningCells;
+let playWinVideo;
+let closeWinVideo;
+let restartGame;
+let updateScoreDisplay;
+let handleCellKeydown;
+let moveCursor;
 
-let skillsUsed = {
-    penguin: {
-        remove: false
-    },
-    seagull: {
-        remove: false
+/**
+ * Renders the game board in the browser.
+ * Creates all board cells, applies rocks in the board,
+ * and attaches keyboard and mouse event handlers.
+ * @returns {void}
+ */
+renderBoard = function renderBoard() {
+    boardElement.innerHTML = "";
+
+    const boardSize = getBoardSize();
+    const board = getBoard();
+
+    let row = 0;
+
+    while (row &lt; boardSize) {
+        const tableRow = document.createElement("tr");
+
+        let col = 0;
+
+        while (col &lt; boardSize) {
+            const cell = document.createElement("td");
+
+            cell.dataset.row = row;
+            cell.dataset.col = col;
+
+            cell.setAttribute("tabindex", "0");
+            cell.addEventListener("keydown", handleCellKeydown);
+
+            if (board[row][col] === "obstacle") {
+                cell.classList.add("obstacle");
+            }
+
+            cell.addEventListener("click", handleCellClick);
+            tableRow.appendChild(cell);
+
+            col += 1;
+        }
+
+        boardElement.appendChild(tableRow);
+
+        row += 1;
     }
 };
 
 /**
- * Update current player, show who's turn now
- * Adds the "active-player" class to the current player's image and removes it 
- * from the other player's image
- * '.active-palyer' is to make the image jump, be bigger, and highlight
- */
-function updateActivePlayerImage() {
-    if (currentPlayer === "penguin") {
-        penguinPlayer.classList.add("active-player");
-        seagullPlayer.classList.remove("active-player");
-    } else {
-        seagullPlayer.classList.add("active-player");
-        penguinPlayer.classList.remove("active-player");
-    }
-
-    updateSkillButtons();
-}
-
-/**
- * check if the skill button has already used once by the user
- */
-function updateSkillButtons() {
-    removeButton.disabled = skillsUsed[currentPlayer].remove;
-}
-
-/**
- * create game board
- * 1. clear the old board
- * 2. Reset game state
- * 3. Load obstacle layout
- * 4. create rows
- * 5. create cells
- * 6. store coordinates
- * 7. add click events
- * 8. add obstacles
- * 9. build HTML board
- * 10. save board data
- */
-function createBoard() {
-    boardElement.innerHTML = ""; //clear every element in the board in HTML
-    board = []; //clear data elemnt in js
-    removeMode = false; //refresh the 'remove' skill when every new round of game starts
-
-    const currentLayout = obstacleLayouts[layoutIndex];  //get the obstacle layout of that round of game
-
-    for (let row = 0; row &lt; boardSize; row += 1) {
-        const rowData = [];
-        const tableRow = document.createElement("tr"); //create row element in HTML
-
-        for (let col = 0; col &lt; boardSize; col += 1) {
-            const cell = document.createElement("td"); //create each block's data element
-
-            cell.dataset.row = row; //store coordinate
-            cell.dataset.col = col; //store coordinate 
-            //what is cell.dataset.row（这是表示？）
-            cell.addEventListener("click", handleCellClick); 
-            //addEventListner是什么 （https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener）
-            if (col === currentLayout[row]) { // Check if this position should contain an obstacle
-                rowData.push("obstacle"); // Save obstacle data into the board array
-                cell.classList.add("obstacle"); // Add obstacle CSS class to the cell
-            } else {
-                rowData.push(""); // Save empty cell data into the board array
-            }
-
-            tableRow.appendChild(cell);   // Add the cell into the current table row
-        }
-
-        board.push(rowData); // Add the completed row data into the board array
-        boardElement.appendChild(tableRow); // Add the completed table row into the HTML board
-    }
-}
-
-
-/**
-  * This is the function to respond users click to the cell
+* This is the function to respond users click to the cell
  * 1. chech the game is over
  * 2. get the position of the clicked cell
  * 3. if in remove mode, move
@@ -170,278 +152,204 @@ function createBoard() {
  * @param {MouseEvent} event The click event from the selected cell
  * @returns {void}
  */
-function handleCellClick(event) {
-    if (gameOver) { //if game is over, stop the function
+handleCellClick = function handleCellClick(event) {
+    const cell = event.currentTarget;
+
+    const row = Number(cell.dataset.row);
+    const col = Number(cell.dataset.col);
+
+    const board = getBoard();
+
+    if (board[row][col] === "obstacle") {
         return;
     }
 
-    const cell = event.currentTarget; //The currentTarget read-only property of the Event interface 
-    // identifies the element to which the event handler has been attached.
-    const row = Number(cell.dataset.row); //get row of the cell
-    const col = Number(cell.dataset.col); //get column of the cell
+    if (getRemoveMode()) {
+        const removeResult = removeOpponentPiece(row, col);
 
-    if (removeMode) {
-        removeOpponentPiece(row, col, cell); //remove the cell clicked if ot is in remove mode
+        statusElement.textContent = removeResult.message;
+
+        if (removeResult.success) {
+            cell.innerHTML = "";
+        }
+
+        updateSkillButtons();
         return;
     }
 
     if (board[row][col] !== "") {
-        return; // if the cell is already occupied, cannot put there
+        return;
     }
 
-    board[row][col] = currentPlayer; //place chess in the current cell of the board (only modified the data)
-    placePiece(cell, currentPlayer); //place chess in the HTML (modified the webpagedisplacement)
+    const player = getCurrentPlayer();
+    const result = placeMove(row, col);
 
-    const winningCells = getWinningCells(row, col, currentPlayer); //get winning cells
+    if (!result.success) {
+        return;
+    }
 
-    if (winningCells.length >= 5) { //check winning or not
-        gameOver = true; //mark the game is over
-        showWinningCells(winningCells);
-        statusElement.textContent = `${getPlayerName(currentPlayer)} wins!`; //HTML displays winning cell (highlight &amp; jumping)
+    placePiece(cell, player);
 
-        setTimeout(function () { //setTimeout is to delay the play of the video
-            playWinVideo(currentPlayer);
+    statusElement.textContent = result.message;
+
+    if (result.type === "win") {
+        showWinningCells(result.winningCells);
+        updateScoreDisplay();
+
+        setTimeout(function () {
+            playWinVideo(result.player);
         }, 600);
 
-        return; // Stop further execution after winning
+        return;
     }
 
-    switchPlayer();
-}
+    if (result.type === "draw") {
+        updateScoreDisplay();
+
+        setTimeout(function () {
+            playWinVideo("draw");
+        }, 600);
+
+        return;
+    }
+
+    updateActivePlayerImage();
+    updateSkillButtons();
+};
 
 /**
  * Place the penguin/seagual chess image when player placed them in a cell
  * @param {HTMLElement} cell The user selected cell
  * @param {string} player THe current player placing the piece
  */
-function placePiece(cell, player) {
-    const piece = document.createElement("img"); //create a new image element
-    piece.classList.add("piece"); // Add CSS class for piece styling
+placePiece = function placePiece(cell, player) {
+    const piece = document.createElement("img");
+
+    piece.classList.add("piece");
 
     if (player === "penguin") {
-        piece.src = "penguin.jpg"; //piece.scr is to load the picture
-        piece.alt = "Penguin"; // Set alternative text for accessibility
+        piece.src = "penguin.jpg";
+        piece.alt = "Penguin";
     } else {
         piece.src = "seagull.jpg";
         piece.alt = "Seagull";
     }
 
-    piece.draggable = false; //cannot drag the picture
-    cell.appendChild(piece); //Add the image element into the selected board cell
-}
+    piece.draggable = false;
+    cell.appendChild(piece);
+};
 
 /**
- * switch player 
- * update the player's highlight image
- * update the text on the webpage
+ * Update current player, show who's turn now
+ * Adds the "active-player" class to the current player's image and removes it
+ * from the other player's image
+ * '.active-palyer' is to make the image jump, be bigger, and highlight
  */
-function switchPlayer() {
-    removeMode = false;
+updateActivePlayerImage = function updateActivePlayerImage() {
+    const currentPlayer = getCurrentPlayer();
 
     if (currentPlayer === "penguin") {
-        currentPlayer = "seagull";
-        statusElement.textContent = "Seagull's turn";
+        penguinPlayer.classList.add("active-player");
+        seagullPlayer.classList.remove("active-player");
     } else {
-        currentPlayer = "penguin";
-        statusElement.textContent = "Penguin's turn";
+        seagullPlayer.classList.add("active-player");
+        penguinPlayer.classList.remove("active-player");
     }
-
-    updateActivePlayerImage();
-}
-
-/**
- * 
- * @param {string} player The current player name
- * @returns {string} The formatted player name
- */
-function getPlayerName(player) {
-    if (player === "penguin") {
-        return "Penguin";
-    }
-    return "Seagull";
-}
-
-/**
- * 
- * @param {string} player The current player name
- * @returns string The opposite player name
- */
-function getOpponent(player) {
-    if (player === "penguin") {
-        return "seagull";
-    }
-
-    return "penguin";
-}
-
-/**
- * 1. check if the game is over and the current player's skill is used already
- * 2. enable the remove skill
- * @returns {void}
- */
-function startRemoveSkill() {
-    if (gameOver || skillsUsed[currentPlayer].remove) {
-        return;
-    }
-
-    removeMode = true;
-    statusElement.textContent = `${getPlayerName(currentPlayer)}: choose one opponent piece to remove`;
-}
-
-/**
- * the skill to remove oppoents piece
- * check if the clicked chess is the opponents' cell
- * remove the chess in the cell
- * update status
- */
-function removeOpponentPiece(row, col, cell) {
-    const opponent = getOpponent(currentPlayer);
-
-    if (board[row][col] !== opponent) {
-        statusElement.textContent = "You can only remove opponent's piece";
-        return;
-    }
-
-    board[row][col] = ""; //remove the cell's data in .js
-    cell.innerHTML = ""; //remove the cell's data in HTML
-
-    skillsUsed[currentPlayer].remove = true;
-    removeMode = false;
-
-    statusElement.textContent = `${getPlayerName(currentPlayer)} removed one opponent piece`;
 
     updateSkillButtons();
-}
+};
 
 /**
- * search in four directions from the current cell
- * search for all the connected player cell in a array and check how many chess are connected together
- * !!! important
- * @param {number} row the row index of current chess
- * @param {number} col the column index of current chess
- * @param {string} player the current player
- * @returns {number[][]} the list of winning cell position
+ * check if the skill button has already used once by the user
  */
-function getWinningCells(row, col, player) {
-    const directions = [
-        [0, 1],
-        [1, 0],
-        [1, 1],
-        [1, -1]
-    ];
+updateSkillButtons = function updateSkillButtons() {
+    const currentPlayer = getCurrentPlayer();
+    const skillsUsed = getSkillsUsed();
 
-    for (const direction of directions) { //check the four firections one by one
-        const rowDirection = direction[0];
-        const colDirection = direction[1];
-
-        const cells = [
-            ...collectCells(row, col, -rowDirection, -colDirection, player).reverse(), // ... is to spread the cell
-            [row, col], //serach on the opposite direction （https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_syntax）
-            ...collectCells(row, col, rowDirection, colDirection, player)
-        ];
-
-        if (cells.length >= 5) {
-            return cells.slice(0, 5);
-        }
-    }
-
-    return [];
-}
+    removeButton.disabled = skillsUsed[currentPlayer].remove;
+};
 
 /**
- * Collect connected player pieces in one direction.
- * 1. Starts from the current piece position
- * 2. Moves step-by-step in the given direction
- * 3. Collects all connected pieces belonging to the same player
- * 4. Stops when reaching the board boundary or a different piece
- * @param {number} row the row index of the current chess
- * @param {number} col the column index of the current chess
- * @param {number} rowDirection 1/-1/0, indicating the row moving direction
- * @param {number} colDirection 1/-1/0, indicatin the column moving direction
- * @param {string} player the current player 
- * @returns {number[][]} A list of connected cell positions
+ * Activates the remove-piece skill for the current player.
+ * Updates the status message and skill button state if the
+ * skill is successfully activated.
+ * @returns {void}
  */
-function collectCells(row, col, rowDirection, colDirection, player) {
-    const cells = [];
+handleRemoveButtonClick = function handleRemoveButtonClick() {
+    const result = startRemoveSkill();
 
-    let nextRow = row + rowDirection;
-    let nextCol = col + colDirection;
-
-    while (
-        nextRow >= 0 &amp;&amp;
-        nextRow &lt; boardSize &amp;&amp;
-        nextCol >= 0 &amp;&amp;
-        nextCol &lt; boardSize &amp;&amp;
-        board[nextRow][nextCol] === player
-    ) {
-        cells.push([nextRow, nextCol]);
-
-        nextRow += rowDirection;
-        nextCol += colDirection;
+    if (!result.success) {
+        return;
     }
 
-    return cells;
-}
+    statusElement.textContent = result.message;
+    updateSkillButtons();
+};
 
 /**
  * Highlight all winning pieces on the board.
- * 
  * 1. Loops through all winning cell positions
  * 2. Finds the matching HTML board cells
  * 3. Finds the piece image inside each cell
  * 4. Adds the winning-piece CSS class for animation effects
- * @param {*} winningCells 
+ * @param {*} winningCells
  */
-function showWinningCells(winningCells) {
-    for (const cellPosition of winningCells) { // Loop through every winning cell position
+showWinningCells = function showWinningCells(winningCells) {
+    let index = 0;
+
+    while (index &lt; winningCells.length) {
+        const cellPosition = winningCells[index];
         const row = cellPosition[0];
         const col = cellPosition[1];
 
         const cell = document.querySelector(
-            `td[data-row="${row}"][data-col="${col}"]` //// Find the matching HTML table cell using a CSS selector
+            `td[data-row="${row}"][data-col="${col}"]`
         );
 
-        const piece = cell.querySelector(".piece"); // find the jpg in the cell
+        const piece = cell.querySelector(".piece");
 
         if (piece !== null) {
-            piece.classList.add("winning-piece"); // Add winning animation CSS class to the piece
+            piece.classList.add("winning-piece");
         }
+
+        index += 1;
     }
-}
+};
 
 /**
 * play different video when different player wins
 * @param {string} winner winning player anme
 */
-function playWinVideo(winner) {
+playWinVideo = function playWinVideo(winner) {
     videoPopupScreen.classList.remove("hidden");
 
     if (winner === "penguin") {
-        winVideo.src = "penguin-win.mp4"; // Set penguin winning video
+        winVideo.src = "penguin-win.mp4";
+    } else if (winner === "seagull") {
+        winVideo.src = "seagull-win.mp4";
     } else {
-        winVideo.src = "seagull-win.mp4"; 
+        winVideo.src = "draw-video.mp4";
     }
 
-    winVideo.currentTime = 0; // Reset the video to the beginning
-    winVideo.play(); // Play the winning video
-}
+    winVideo.volume = 0.4;
+    winVideo.currentTime = 0;
+    winVideo.play();
+};
 
 /**
  * close the winning pop up window and restart
- * 
  */
-function closeWinVideo() {
+closeWinVideo = function closeWinVideo() {
     winVideo.pause();
-    winVideo.src = "";  // Remove the current video source
+    winVideo.src = "";
 
-    videoPopupScreen.classList.add("hidden");  // Hide the video popup screen
+    videoPopupScreen.classList.add("hidden");
 
     restartGame();
-}
+};
 
 /**
  * Restart the game and reset all game states.
- * 
  * 1. Switches to the next obstacle layout
  * 2. Alternates the starting player
  * 3. Resets game status variables
@@ -450,56 +358,128 @@ function closeWinVideo() {
  * 6. Hides and clears the win video popup
  * 7. Recreates the board
  * 8. Updates the active player highlight
- * 
  * @returns {void}
  */
-function restartGame() {
-    layoutIndex += 1; //change obstacle map
+restartGame = function restartGame() {
+    const result = restartGameData();
 
-    if (layoutIndex >= obstacleLayouts.length) {
-        layoutIndex = 0;
-    }
-
-    if (startingPlayer === "penguin") {
-        startingPlayer = "seagull";
-    } else {
-        startingPlayer = "penguin";
-    }
-
-    currentPlayer = startingPlayer;
-    gameOver = false;
-    removeMode = false;
-
-    skillsUsed = {
-        penguin: {
-            remove: false
-        },
-        seagull: {
-            remove: false
-        }
-    };
-
-    statusElement.textContent = `${getPlayerName(currentPlayer)}'s turn`;
+    statusElement.textContent = result.message;
 
     videoPopupScreen.classList.add("hidden");
     winVideo.pause();
     winVideo.src = "";
 
-    createBoard();
+    renderBoard();
     updateActivePlayerImage();
-}
+    updateScoreDisplay();
+};
 
-document.addEventListener("click", function () { // Add a click event listener to the whole webpage
-    const bgm = document.getElementById("bgm"); // Find the background music audio element
-    bgm.play(); //play background music
-}, { once: true }); // Ensure the click event only runs once
+/**
+ * Update the score display for both players.
+*/
+updateScoreDisplay = function updateScoreDisplay() {
+    const scores = getScores();
+
+    penguinWinElement.textContent = scores.penguin.win;
+    penguinLossElement.textContent = scores.penguin.loss;
+    penguinDrawElement.textContent = scores.penguin.draw;
+
+    seagullWinElement.textContent = scores.seagull.win;
+    seagullLossElement.textContent = scores.seagull.loss;
+    seagullDrawElement.textContent = scores.seagull.draw;
+};
+
+/**
+ * Handles keyboard input for board navigation.
+ * Allows the player to move the cursor using the
+ * arrow keys and select a cell using Enter or Space.
+ * @param {KeyboardEvent} event The keyboard event.
+ * @returns {void}
+ */
+handleCellKeydown = function handleCellKeydown(event) {
+    const cell = event.currentTarget;
+
+    cursorRow = Number(cell.dataset.row);
+    cursorCol = Number(cell.dataset.col);
+
+    if (event.key === "ArrowUp") {
+        event.preventDefault();
+        moveCursor(-1, 0);
+    } else if (event.key === "ArrowDown") {
+        event.preventDefault();
+        moveCursor(1, 0);
+    } else if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        moveCursor(0, -1);
+    } else if (event.key === "ArrowRight") {
+        event.preventDefault();
+        moveCursor(0, 1);
+    } else if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        cell.click();
+    }
+};
+
+/**
+ * Moves the keyboard cursor to a new board position.
+ * Keeps the cursor within the board boundaries and
+ * updates focus to the newly selected cell.
+ * @param {number} rowChange The row offset to apply.
+ * @param {number} colChange The column offset to apply.
+ * @returns {void}
+ */
+moveCursor = function moveCursor(rowChange, colChange) {
+    const boardSize = getBoardSize();
+
+    cursorRow += rowChange;
+    cursorCol += colChange;
+
+    if (cursorRow &lt; 0) {
+        cursorRow = 0;
+    }
+
+    if (cursorRow >= boardSize) {
+        cursorRow = boardSize - 1;
+    }
+
+    if (cursorCol &lt; 0) {
+        cursorCol = 0;
+    }
+
+    if (cursorCol >= boardSize) {
+        cursorCol = boardSize - 1;
+    }
+
+    const nextCell = document.querySelector(
+        `td[data-row="${cursorRow}"][data-col="${cursorCol}"]`
+    );
+
+    if (nextCell !== null) {
+        nextCell.focus();
+    }
+};
+
+document.addEventListener("click", function () {
+    const bgm = document.getElementById("bgm");
+    bgm.play();
+}, {once: true});
 
 restartButton.addEventListener("click", restartGame);
 closeVideoButton.addEventListener("click", closeWinVideo);
-removeButton.addEventListener("click", startRemoveSkill);
+removeButton.addEventListener("click", handleRemoveButtonClick);
 
-createBoard();
-updateActivePlayerImage();</code></pre>
+createBoardData();
+renderBoard();
+updateActivePlayerImage();
+updateScoreDisplay();
+
+const firstCell = document.querySelector(
+    "td[data-row=\"0\"][data-col=\"0\"]"
+);
+
+if (firstCell !== null) {
+    firstCell.focus();
+}</code></pre>
         </article>
     </section>
 
@@ -513,7 +493,7 @@ updateActivePlayerImage();</code></pre>
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.5</a> on Tue Jun 02 2026 15:28:37 GMT+0100 (British Summer Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.5</a> on Wed Jun 24 2026 14:37:35 GMT+0100 (British Summer Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>

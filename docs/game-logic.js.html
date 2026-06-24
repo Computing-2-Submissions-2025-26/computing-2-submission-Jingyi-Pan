@@ -1,4 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <title>game-logic.js - Documentation</title>
+    
+    
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <script src="scripts/nav.js" defer></script>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
 
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav >
+    
+    
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-GameLogic.html">GameLogic</a><ul class='methods'><li data-type='method'><a href="module-GameLogic.html#~collectCells">collectCells</a></li><li data-type='method'><a href="module-GameLogic.html#~createBoardData">createBoardData</a></li><li data-type='method'><a href="module-GameLogic.html#~getOpponent">getOpponent</a></li><li data-type='method'><a href="module-GameLogic.html#~getPlayerName">getPlayerName</a></li><li data-type='method'><a href="module-GameLogic.html#~getWinningCells">getWinningCells</a></li><li data-type='method'><a href="module-GameLogic.html#~isDraw">isDraw</a></li><li data-type='method'><a href="module-GameLogic.html#~placeMove">placeMove</a></li><li data-type='method'><a href="module-GameLogic.html#~removeOpponentPiece">removeOpponentPiece</a></li><li data-type='method'><a href="module-GameLogic.html#~restartGameData">restartGameData</a></li><li data-type='method'><a href="module-GameLogic.html#~startRemoveSkill">startRemoveSkill</a></li><li data-type='method'><a href="module-GameLogic.html#~switchPlayer">switchPlayer</a></li></ul></li></ul><h3>Global</h3><ul><li><a href="global.html#closeWinVideo">closeWinVideo</a></li><li><a href="global.html#handleCellClick">handleCellClick</a></li><li><a href="global.html#handleCellKeydown">handleCellKeydown</a></li><li><a href="global.html#handleRemoveButtonClick">handleRemoveButtonClick</a></li><li><a href="global.html#moveCursor">moveCursor</a></li><li><a href="global.html#placePiece">placePiece</a></li><li><a href="global.html#playWinVideo">playWinVideo</a></li><li><a href="global.html#renderBoard">renderBoard</a></li><li><a href="global.html#restartGame">restartGame</a></li><li><a href="global.html#showWinningCells">showWinningCells</a></li><li><a href="global.html#updateActivePlayerImage">updateActivePlayerImage</a></li><li><a href="global.html#updateScoreDisplay">updateScoreDisplay</a></li><li><a href="global.html#updateSkillButtons">updateSkillButtons</a></li></ul>
+    
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">game-logic.js</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>
 /**
  * Gomoku game (Connect Five) logic module.
  * Handles board state and game rules.
@@ -111,10 +158,10 @@ function createBoardData() {
 
     let row = 0;
 
-    while (row < boardSize) {
+    while (row &lt; boardSize) {
         const rowData = [];
         let col = 0;
-        while (col < boardSize) {
+        while (col &lt; boardSize) {
             if (col === currentLayout[row]) {
                 rowData.push("obstacle");
             } else {
@@ -153,10 +200,10 @@ collectCells = function collectCells(
     let nextCol = col + colDirection;
 
     while (
-        nextRow >= 0 &&
-        nextRow < boardSize &&
-        nextCol >= 0 &&
-        nextCol < boardSize &&
+        nextRow >= 0 &amp;&amp;
+        nextRow &lt; boardSize &amp;&amp;
+        nextCol >= 0 &amp;&amp;
+        nextCol &lt; boardSize &amp;&amp;
         board[nextRow][nextCol] === player
     ) {
         cells.push([nextRow, nextCol]);
@@ -188,7 +235,7 @@ getWinningCells = function getWinningCells(row, col, player) {
 
     let index = 0;
 
-    while (index < directions.length) {
+    while (index &lt; directions.length) {
         let direction = directions[index];
         let rowDirection = direction[0];
         let colDirection = direction[1];
@@ -230,10 +277,10 @@ getWinningCells = function getWinningCells(row, col, player) {
 isDraw = function isDraw() {
     let row = 0;
 
-    while (row < boardSize) {
+    while (row &lt; boardSize) {
         let col = 0;
 
-        while (col < boardSize) {
+        while (col &lt; boardSize) {
             if (board[row][col] === "") {
                 return false;
             }
@@ -428,4 +475,30 @@ export {
     startRemoveSkill,
     removeOpponentPiece,
     restartGameData
-};
+};</code></pre>
+        </article>
+    </section>
+
+
+
+
+    
+    
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.5</a> on Wed Jun 24 2026 14:37:35 GMT+0100 (British Summer Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/polyfill.js"></script>
+<script src="scripts/linenumber.js"></script>
+
+
+
+    <link type="text/css" rel="stylesheet" href="custom.css">
+    
+</body>
+</html>
