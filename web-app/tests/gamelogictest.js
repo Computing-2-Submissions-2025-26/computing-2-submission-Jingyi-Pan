@@ -1,4 +1,4 @@
-import assert from "node:assert/strict";
+import assert from "assert";
 
 import {
     getBoardSize,
@@ -12,182 +12,320 @@ import {
     placeMove,
     startRemoveSkill,
     removeOpponentPiece,
-    restartGameData
+    restartGameData,
+    resetGameDataForTest
 } from "../game-logic.js";
 
-describe("Gomoku game logic", function () {
+describe("Gomoku Game Logic", function () {
 
     beforeEach(function () {
-        restartGameData();
+        resetGameDataForTest();
     });
 
-    it("creates a 15 by 15 board", function () {
-        createBoardData();
+    describe("Basic game data", function () {
 
-        const board = getBoard();
+        it("should return the correct board size", function () {
+            assert.equal(getBoardSize(), 15);
+        });
 
-        assert.equal(getBoardSize(), 15);
-        assert.equal(board.length, 15);
-        assert.equal(board[0].length, 15);
-    });
-
-    it("places obstacles on the board", function () {
-        createBoardData();
-
-        const board = getBoard();
-
-        let obstacleCount = 0;
-
-        for (let row = 0; row < getBoardSize(); row += 1) {
-            for (let col = 0; col < getBoardSize(); col += 1) {
-                if (board[row][col] === "obstacle") {
-                    obstacleCount += 1;
-                }
-            }
-        }
-
-        assert.equal(obstacleCount, 15);
-    });
-
-    it("starts with penguin or seagull as the current player", function () {
-        const currentPlayer = getCurrentPlayer();
-
-        assert.ok(
-            currentPlayer === "penguin" || currentPlayer === "seagull"
-        );
-    });
-
-    it("places a piece on an empty cell", function () {
-        createBoardData();
-
-        const player = getCurrentPlayer();
-        const result = placeMove(0, 0);
-
-        assert.equal(result.success, true);
-        assert.equal(getBoard()[0][0], player);
-    });
-
-    it("does not allow a move on an occupied cell", function () {
-        createBoardData();
-
-        placeMove(0, 0);
-        const result = placeMove(0, 0);
-
-        assert.equal(result.success, false);
-    });
-
-    it("switches player after a normal move", function () {
-        createBoardData();
-
-        const firstPlayer = getCurrentPlayer();
-
-        placeMove(0, 0);
-
-        const secondPlayer = getCurrentPlayer();
-
-        assert.notEqual(secondPlayer, firstPlayer);
-    });
-
-    it("returns the correct player display name", function () {
-        assert.equal(getPlayerName("penguin"), "Penguin");
-        assert.equal(getPlayerName("seagull"), "Seagull");
-    });
-
-    it("allows remove skill to be started once", function () {
-        createBoardData();
-
-        const result = startRemoveSkill();
-
-        assert.equal(result.success, true);
-        assert.equal(getRemoveMode(), true);
-    });
-
-    it("does not allow removing an empty square", function () {
-        createBoardData();
-
-        startRemoveSkill();
-
-        const result = removeOpponentPiece(0, 0);
-
-        assert.equal(result.success, false);
-        assert.equal(result.message, "You can only remove opponent's piece");
-    });
-
-    it("resets remove skill after restart", function () {
-        createBoardData();
-
-        startRemoveSkill();
-        restartGameData();
-
-        assert.equal(getRemoveMode(), false);
-
-        const currentPlayer = getCurrentPlayer();
-        const skillsUsed = getSkillsUsed();
-
-        assert.equal(skillsUsed[currentPlayer].remove, false);
-    });
-
-   it("updates score when a player wins with five connected pieces", function () {
-            createBoardData();
-
+        it("should create a 15 by 15 board", function () {
             const board = getBoard();
-            const currentPlayer = getCurrentPlayer();
-            const scoresBefore = getScores()[currentPlayer].win;
 
-            let winRow = 0;
-            let winStartCol = 0;
-            let foundWinningLine = false;
+            assert.equal(board.length, 15);
+            assert.equal(board[0].length, 15);
+        });
 
-            for (let row = 0; row < getBoardSize(); row += 1) {
-                for (let col = 0; col <= getBoardSize() - 5; col += 1) {
-                    if (
-                        board[row][col] === "" &&
-                        board[row][col + 1] === "" &&
-                        board[row][col + 2] === "" &&
-                        board[row][col + 3] === "" &&
-                        board[row][col + 4] === ""
-                    ) {
-                        winRow = row;
-                        winStartCol = col;
-                        foundWinningLine = true;
+        it("should place one obstacle in each row", function () {
+            const board = getBoard();
+
+            let obstacleCount = 0;
+
+            board.forEach(function (row) {
+                row.forEach(function (cell) {
+                    if (cell === "obstacle") {
+                        obstacleCount += 1;
                     }
-                }
-            }
+                });
+            });
 
-            assert.equal(foundWinningLine, true);
+            assert.equal(obstacleCount, 15);
+        });
 
-            const fillerCells = [];
+        it("should start with penguin as the current player", function () {
+            assert.equal(getCurrentPlayer(), "penguin");
+        });
 
-            for (let row = 0; row < getBoardSize(); row += 1) {
-                for (let col = 0; col < getBoardSize(); col += 1) {
-                    const isWinningCell = (
-                        row === winRow &&
-                        col >= winStartCol &&
-                        col <= winStartCol + 4
-                    );
+        it("should format penguin name correctly", function () {
+            assert.equal(getPlayerName("penguin"), "Penguin");
+        });
 
-                    if (board[row][col] === "" && !isWinningCell) {
-                        fillerCells.push([row, col]);
-                    }
-                }
-            }
+        it("should format seagull name correctly", function () {
+            assert.equal(getPlayerName("seagull"), "Seagull");
+        });
 
-            placeMove(winRow, winStartCol);
-            placeMove(fillerCells[0][0], fillerCells[0][1]);
-
-            placeMove(winRow, winStartCol + 1);
-            placeMove(fillerCells[1][0], fillerCells[1][1]);
-
-            placeMove(winRow, winStartCol + 2);
-            placeMove(fillerCells[2][0], fillerCells[2][1]);
-
-            placeMove(winRow, winStartCol + 3);
-            placeMove(fillerCells[3][0], fillerCells[3][1]);
-
-            const result = placeMove(winRow, winStartCol + 4);
-
-            assert.equal(result.type, "win");
-            assert.equal(result.player, currentPlayer);
-            assert.equal(getScores()[currentPlayer].win, scoresBefore + 1);
     });
+
+    describe("placeMove", function () {
+
+        it("should place the current player's piece on an empty cell", function () {
+            const board = getBoard();
+
+            const result = placeMove(1, 0);
+
+            assert.equal(result.success, true);
+            assert.equal(board[1][0], "penguin");
+        });
+
+        it("should switch player after a normal move", function () {
+            const result = placeMove(1, 0);
+
+            assert.equal(result.type, "normal");
+            assert.equal(getCurrentPlayer(), "seagull");
+        });
+
+        it("should not allow placing a piece on an occupied cell", function () {
+            const board = getBoard();
+
+            placeMove(1, 0);
+            const result = placeMove(1, 0);
+
+            assert.equal(result.success, false);
+            assert.equal(board[1][0], "penguin");
+        });
+
+        it("should not allow placing a piece on an obstacle", function () {
+            const board = getBoard();
+
+            const row = 0;
+            const col = board[0].indexOf("obstacle");
+
+            const result = placeMove(row, col);
+
+            assert.equal(result.success, false);
+            assert.equal(board[row][col], "obstacle");
+        });
+
+    });
+
+    describe("Winning condition", function () {
+
+        it("should detect a horizontal win", function () {
+            const board = getBoard();
+
+            board[1][0] = "penguin";
+            board[1][1] = "penguin";
+            board[1][2] = "penguin";
+            board[1][3] = "penguin";
+            board[1][4] = "";
+
+            const result = placeMove(1, 4);
+
+            assert.equal(result.success, true);
+            assert.equal(result.type, "win");
+            assert.equal(result.player, "penguin");
+            assert.equal(result.winningCells.length, 5);
+        });
+
+        it("should detect a vertical win", function () {
+            const board = getBoard();
+
+            board[0][0] = "penguin";
+            board[1][0] = "penguin";
+            board[2][0] = "penguin";
+            board[3][0] = "penguin";
+            board[4][0] = "";
+
+            const result = placeMove(4, 0);
+
+            assert.equal(result.success, true);
+            assert.equal(result.type, "win");
+            assert.equal(result.player, "penguin");
+            assert.equal(result.winningCells.length, 5);
+        });
+
+        it("should detect a diagonal win from top-left to bottom-right", function () {
+            const board = getBoard();
+
+            board[5][0] = "penguin";
+            board[6][1] = "penguin";
+            board[7][2] = "penguin";
+            board[8][3] = "penguin";
+            board[9][4] = "";
+
+            const result = placeMove(9, 4);
+
+            assert.equal(result.success, true);
+            assert.equal(result.type, "win");
+            assert.equal(result.player, "penguin");
+            assert.equal(result.winningCells.length, 5);
+        });
+
+        it("should detect a diagonal win from top-right to bottom-left", function () {
+            const board = getBoard();
+
+            board[5][4] = "penguin";
+            board[6][3] = "penguin";
+            board[7][2] = "penguin";
+            board[8][1] = "penguin";
+            board[9][0] = "";
+
+            const result = placeMove(9, 0);
+
+            assert.equal(result.success, true);
+            assert.equal(result.type, "win");
+            assert.equal(result.player, "penguin");
+            assert.equal(result.winningCells.length, 5);
+        });
+
+        it("should not count four connected pieces as a win", function () {
+            const board = getBoard();
+
+            board[1][0] = "penguin";
+            board[1][1] = "penguin";
+            board[1][2] = "penguin";
+            board[1][3] = "";
+
+            const result = placeMove(1, 3);
+
+            assert.equal(result.success, true);
+            assert.equal(result.type, "normal");
+        });
+
+    });
+
+    describe("Remove skill", function () {
+
+        it("should start remove mode when the current player has not used the skill", function () {
+            const result = startRemoveSkill();
+
+            assert.equal(result.success, true);
+            assert.equal(getRemoveMode(), true);
+        });
+
+        it("should remove an opponent piece", function () {
+            const board = getBoard();
+
+            board[1][0] = "seagull";
+
+            const result = removeOpponentPiece(1, 0);
+
+            assert.equal(result.success, true);
+            assert.equal(board[1][0], "");
+            assert.equal(getSkillsUsed().penguin.remove, true);
+            assert.equal(getRemoveMode(), false);
+        });
+
+        it("should not remove the current player's own piece", function () {
+            const board = getBoard();
+
+            board[1][0] = "penguin";
+
+            const result = removeOpponentPiece(1, 0);
+
+            assert.equal(result.success, false);
+            assert.equal(board[1][0], "penguin");
+        });
+
+        it("should not remove an empty cell", function () {
+            const board = getBoard();
+
+            board[1][0] = "";
+
+            const result = removeOpponentPiece(1, 0);
+
+            assert.equal(result.success, false);
+            assert.equal(board[1][0], "");
+        });
+
+        it("should not allow the same player to start remove skill twice", function () {
+            const board = getBoard();
+
+            board[1][0] = "seagull";
+
+            startRemoveSkill();
+            removeOpponentPiece(1, 0);
+
+            const result = startRemoveSkill();
+
+            assert.equal(result.success, false);
+        });
+
+    });
+
+    describe("Score system", function () {
+
+        it("should increase winner's win score after a win", function () {
+            const board = getBoard();
+            const oldScore = getScores().penguin.win;
+
+            board[1][0] = "penguin";
+            board[1][1] = "penguin";
+            board[1][2] = "penguin";
+            board[1][3] = "penguin";
+            board[1][4] = "";
+
+            placeMove(1, 4);
+
+            assert.equal(getScores().penguin.win, oldScore + 1);
+        });
+
+        it("should increase opponent's loss score after a win", function () {
+            const board = getBoard();
+            const oldScore = getScores().seagull.loss;
+
+            board[1][0] = "penguin";
+            board[1][1] = "penguin";
+            board[1][2] = "penguin";
+            board[1][3] = "penguin";
+            board[1][4] = "";
+
+            placeMove(1, 4);
+
+            assert.equal(getScores().seagull.loss, oldScore + 1);
+        });
+
+    });
+
+    describe("Restart game", function () {
+
+        it("should restart the game and return a turn message", function () {
+            const result = restartGameData();
+
+            assert.equal(result.message.includes("'s turn"), true);
+        });
+
+        it("should reset remove mode after restart", function () {
+            startRemoveSkill();
+
+            restartGameData();
+
+            assert.equal(getRemoveMode(), false);
+        });
+
+        it("should reset remove skill usage after restart", function () {
+            const board = getBoard();
+
+            board[1][0] = "seagull";
+
+            startRemoveSkill();
+            removeOpponentPiece(1, 0);
+
+            restartGameData();
+
+            assert.equal(getSkillsUsed().penguin.remove, false);
+            assert.equal(getSkillsUsed().seagull.remove, false);
+        });
+
+        it("should switch starting player after restart", function () {
+            const beforeRestart = getCurrentPlayer();
+
+            restartGameData();
+
+            const afterRestart = getCurrentPlayer();
+
+            assert.notEqual(afterRestart, beforeRestart);
+        });
+
+    });
+
 });

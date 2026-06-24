@@ -9,7 +9,8 @@ import {
     placeMove,
     startRemoveSkill,
     removeOpponentPiece,
-    restartGameData
+    restartGameData,
+    resetGameDataForTest
 } from "./game-logic.js";
 
 const boardElement = document.getElementById("board");
@@ -181,10 +182,10 @@ placePiece = function placePiece(cell, player) {
     piece.classList.add("piece");
 
     if (player === "penguin") {
-        piece.src = "penguin.jpg";
+        piece.src = "assets/penguin.jpg";
         piece.alt = "Penguin";
     } else {
-        piece.src = "seagull.jpg";
+        piece.src = "assets/seagull.jpg";
         piece.alt = "Seagull";
     }
 
@@ -277,11 +278,11 @@ playWinVideo = function playWinVideo(winner) {
     videoPopupScreen.classList.remove("hidden");
 
     if (winner === "penguin") {
-        winVideo.src = "penguin-win.mp4";
+        winVideo.src = "assets/penguin-win.mp4";
     } else if (winner === "seagull") {
-        winVideo.src = "seagull-win.mp4";
+        winVideo.src = "assets/seagull-win.mp4";
     } else {
-        winVideo.src = "draw-video.mp4";
+        winVideo.src = "assets/draw-video.mp4";
     }
 
     winVideo.volume = 0.4;

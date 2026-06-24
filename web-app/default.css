@@ -94,7 +94,7 @@ body {
     font-family: var(--font-family-main);
     color: var(--text-color);
 
-    background-image: url("background.jpg");
+    background-image: url("assets/background.jpg");
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -158,7 +158,7 @@ td {
     overflow: hidden;
 }
 
-/* 海滩风跳色棋盘 */
+
 tr:nth-child(odd) td:nth-child(odd) {
     background: var(--board-light-cell);
 }
@@ -175,7 +175,7 @@ tr:nth-child(even) td:nth-child(even) {
     background: var(--board-light-cell);
 }
 
-/* 柔和网格线 */
+
 td::after {
     content: "";
     position: absolute;
@@ -184,7 +184,7 @@ td::after {
     pointer-events: none;
 }
 
-/* 鼠标悬停 */
+
 td:hover {
     filter: brightness(1.08);
     transform: scale(1.03);
@@ -446,7 +446,7 @@ td:hover {
     position: absolute;
     inset: 0;
 
-    background-image: url("rock.jpg");
+    background-image: url("assets/rock.jpg");
     background-size: 80%;
     background-repeat: no-repeat;
     background-position: center;

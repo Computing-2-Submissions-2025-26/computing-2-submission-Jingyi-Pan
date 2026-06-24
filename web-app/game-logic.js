@@ -73,6 +73,7 @@ function getSkillsUsed() {
     return skillsUsed;
 }
 
+
 /**
  * @param {string} player The current player name
  * @returns {string} The formatted player name
@@ -213,7 +214,7 @@ getWinningCells = function getWinningCells(row, col, player) {
 
 
         if (cells.length >= 5) {
-            return cells.slice(0, 5);
+            return cells.slice(0, 6);
         }
 
         index += 1;
@@ -415,6 +416,39 @@ function restartGameData() {
     };
 }
 
+function resetGameDataForTest() {
+    board = [];
+    startingPlayer = "penguin";
+    currentPlayer = "penguin";
+    gameOver = false;
+    removeMode = false;
+    layoutIndex = 0;
+
+    skillsUsed = {
+        penguin: {
+            remove: false
+        },
+        seagull: {
+            remove: false
+        }
+    };
+
+    scores = {
+        penguin: {
+            win: 0,
+            loss: 0,
+            draw: 0
+        },
+        seagull: {
+            win: 0,
+            loss: 0,
+            draw: 0
+        }
+    };
+
+    createBoardData();
+}
+
 export {
     getBoardSize,
     getBoard,
@@ -427,5 +461,6 @@ export {
     placeMove,
     startRemoveSkill,
     removeOpponentPiece,
-    restartGameData
+    restartGameData,
+    resetGameDataForTest
 };
