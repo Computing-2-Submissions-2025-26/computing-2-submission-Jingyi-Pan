@@ -462,5 +462,6 @@ export {
     startRemoveSkill,
     removeOpponentPiece,
     restartGameData,
-    resetGameDataForTest
+    resetGameDataForTest,
+    isDraw
 };

@@ -9,8 +9,7 @@ import {
     placeMove,
     startRemoveSkill,
     removeOpponentPiece,
-    restartGameData,
-    resetGameDataForTest
+    restartGameData
 } from "./game-logic.js";
 
 const boardElement = document.getElementById("board");
@@ -75,6 +74,11 @@ renderBoard = function renderBoard() {
             cell.dataset.col = col;
 
             cell.setAttribute("tabindex", "0");
+            cell.setAttribute("role", "button");
+            cell.setAttribute(
+                "aria-label",
+                `Row ${row + 1}, column ${col + 1}`
+            );
             cell.addEventListener("keydown", handleCellKeydown);
 
             if (board[row][col] === "obstacle") {
