@@ -1,4 +1,4 @@
-
+import R from "./ramda.js";
 /**
  * Gomoku game (Connect Five) logic module.
  * Handles board state and game rules.
@@ -105,27 +105,19 @@ function getOpponent(player) {
  * @returns {void}
  */
 function createBoardData() {
-    board = [];
     removeMode = false;
 
     const currentLayout = obstacleLayouts[layoutIndex];
 
-    let row = 0;
-
-    while (row < boardSize) {
-        const rowData = [];
-        let col = 0;
-        while (col < boardSize) {
+    board = R.range(0, boardSize).map(function (row) {
+        return R.range(0, boardSize).map(function (col) {
             if (col === currentLayout[row]) {
-                rowData.push("obstacle");
-            } else {
-                rowData.push("");
+                return "obstacle";
             }
-            col += 1;
-        }
-        board.push(rowData);
-        row += 1;
-    }
+
+            return "";
+        });
+    });
 }
 
 /**
@@ -214,7 +206,7 @@ getWinningCells = function getWinningCells(row, col, player) {
 
 
         if (cells.length >= 5) {
-            return cells.slice(0, 6);
+            return cells.slice(0, 5);
         }
 
         index += 1;
@@ -229,23 +221,10 @@ getWinningCells = function getWinningCells(row, col, player) {
  * @returns {boolean} True if there are no empty cells remaining.
  */
 isDraw = function isDraw() {
-    let row = 0;
-
-    while (row < boardSize) {
-        let col = 0;
-
-        while (col < boardSize) {
-            if (board[row][col] === "") {
-                return false;
-            }
-
-            col += 1;
-        }
-
-        row += 1;
-    }
-
-    return true;
+    return R.pipe(
+        R.flatten,
+        R.none(R.equals(""))
+    )(board);
 };
 
 

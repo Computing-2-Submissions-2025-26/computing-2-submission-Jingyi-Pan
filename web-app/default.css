@@ -300,10 +300,12 @@ td:hover {
     color: var(--button-text-color);
 
     font-size: var(--font-size-close-button);
-    line-height: var(--close-button-size);
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
 
     cursor: pointer;
-
     z-index: 2;
 }
 

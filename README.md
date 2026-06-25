@@ -87,7 +87,7 @@ The implementation of the Gomoku game logic and win detection algorithm was deve
 - Dynamic Tic Tac Toe / Gomoku / Five In a Row with Minimax  
   https://www.youtube.com/watch?v=EyXGGch2fnE
 
-ChatGPT was used as a programming assistant to help debug code, refactor the project structure, improve accessibility, and review unit tests.
+ChatGPT was used as a programming assistant to help debug code, refactor the project structure.
 
 Win and draw animations were generated using Seedance.
 
